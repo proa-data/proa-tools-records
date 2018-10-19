@@ -1,0 +1,61 @@
+{
+  "name": "proa-tools-records",
+  "version": "1.0.0",
+  "description": "Management (pagination and ordering) of records within tables using mainly AngularJS and Bootstrap 3.",
+  "main": [
+    "./dist/proa-tools-records.css",
+    "./dist/proa-tools-records.js"
+  ],
+  "authors": [
+    "Miquel Alejandro Vicens Dalmau <mvicens@proadata.com>"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "pagination",
+    "ordering",
+    "tables",
+    "angular",
+    "bootstrap"
+  ],
+  "homepage": "https://github.com/proa-data/proa-tools-records",
+  "ignore": [
+    ".gitignore",
+    "package.json",
+    "package-lock.json",
+    "gulpfile.js",
+    "demo/"
+  ],
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "angular": "^1.7.5",
+    "angular-aria": "^1.7.5",
+    "angular-bootstrap": "^2.5.0",
+    "bootstrap": "^3.3.7"
+  },
+  "devDependencies": {
+    "chance": "^1.0.16"
+  },
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "dist/css/bootstrap.css",
+        "dist/fonts/glyphicons-halflings-regular.eot",
+        "dist/fonts/glyphicons-halflings-regular.woff2",
+        "dist/fonts/glyphicons-halflings-regular.woff",
+        "dist/fonts/glyphicons-halflings-regular.ttf",
+        "dist/fonts/glyphicons-halflings-regular.svg"
+      ]
+    },
+    "font-awesome": {
+      "main": [
+        "web-fonts-with-css/less/fontawesome.less",
+        "web-fonts-with-css/less/solid.less",
+        "web-fonts-with-css/webfonts/fa-solid-900.eot",
+        "web-fonts-with-css/webfonts/fa-solid-900.woff2",
+        "web-fonts-with-css/webfonts/fa-solid-900.woff",
+        "web-fonts-with-css/webfonts/fa-solid-900.ttf",
+        "web-fonts-with-css/webfonts/fa-solid-900.svg"
+      ]
+    }
+  }
+}
