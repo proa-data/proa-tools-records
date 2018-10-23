@@ -2,13 +2,13 @@
 
 Management (pagination and ordering) of records within tables using mainly AngularJS and Bootstrap 3.
 
-## Install
+## Installation
 
-```
+```powershell
 bower install proa-tools-records
 ```
 
-## Use
+## Usage
 
 Everything are AngularJS directives as a attributes:
 
