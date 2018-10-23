@@ -1,6 +1,6 @@
 {
   "name": "proa-tools-records",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Management (pagination and ordering) of records within tables using mainly AngularJS and Bootstrap 3.",
   "main": [
     "./dist/proa-tools-records.css",
@@ -44,17 +44,6 @@
         "dist/fonts/glyphicons-halflings-regular.woff",
         "dist/fonts/glyphicons-halflings-regular.ttf",
         "dist/fonts/glyphicons-halflings-regular.svg"
-      ]
-    },
-    "font-awesome": {
-      "main": [
-        "web-fonts-with-css/less/fontawesome.less",
-        "web-fonts-with-css/less/solid.less",
-        "web-fonts-with-css/webfonts/fa-solid-900.eot",
-        "web-fonts-with-css/webfonts/fa-solid-900.woff2",
-        "web-fonts-with-css/webfonts/fa-solid-900.woff",
-        "web-fonts-with-css/webfonts/fa-solid-900.ttf",
-        "web-fonts-with-css/webfonts/fa-solid-900.svg"
       ]
     }
   }
