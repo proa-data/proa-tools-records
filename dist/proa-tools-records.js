@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.0.0 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.0.3 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
