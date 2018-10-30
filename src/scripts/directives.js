@@ -109,6 +109,8 @@ function ptItem( uibPaginationConfig, compilerPostLink ) {
 	return {
 		restrict: 'A',
 		require: '^^ptList',
+		terminal: true,
+		priority: 1000,
 		compile: compile
 	};
 

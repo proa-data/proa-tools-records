@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.0.4 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.0.5 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -138,6 +138,8 @@ function ptItem( uibPaginationConfig, compilerPostLink ) {
 	return {
 		restrict: 'A',
 		require: '^^ptList',
+		terminal: true,
+		priority: 1000,
 		compile: compile
 	};
 
