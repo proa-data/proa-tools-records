@@ -1,6 +1,6 @@
 {
   "name": "proa-tools-records",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Management (pagination and ordering) of records within tables using mainly AngularJS and Bootstrap 3.",
   "main": [
     "./dist/proa-tools-records.css",
