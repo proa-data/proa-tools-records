@@ -1,4 +1,4 @@
-const pckg = require('./bower.json'),
+const pckg = require('./package.json'),
 	gulp = require('gulp'),
 	$ = require('gulp-load-plugins')(),
 	mainBowerFiles = require('main-bower-files'),
