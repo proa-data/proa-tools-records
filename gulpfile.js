@@ -21,7 +21,7 @@ gulp.task('styles:min', () => processCss((stream) => stream.pipe($.cssnano()).pi
 gulp.task('styles', ['styles:copy', 'styles:min']);
 
 gulp.task('scripts:copy', () => processJs());
-gulp.task('scripts:min', () => processJs((stream) => stream.pipe($.ngAnnotate()).pipe($.uglify()).pipe(renameMin())));
+gulp.task('scripts:min', () => processJs((stream) => stream.pipe($.ngAnnotate()).pipe($.uglify({output: {comments: '/^!/'}})).pipe(renameMin())));
 gulp.task('scripts', ['scripts:copy', 'scripts:min']);
 
 gulp.task('build', gulpSync.sync([
