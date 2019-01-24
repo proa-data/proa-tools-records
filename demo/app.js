@@ -6,6 +6,7 @@ angular
 function DemoController() {
 	var vm = this;
 	vm.list = [];
+	vm.xlsFilename = 'Example file';
 	vm.load = load;
 	vm.empty = empty;
 
