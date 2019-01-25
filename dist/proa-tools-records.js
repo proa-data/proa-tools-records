@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.1.1 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.1.2 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -81,7 +81,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		}
 
 		function exportToXls() {
-			XLSX.writeFile( XLSX.utils.table_to_book( $scope.$$element ), $attrs.ptExport + '.xlsx' );
+			XLSX.writeFile( XLSX.utils.table_to_book( $scope.$$element ), ( $attrs.ptExport || 'Excel' ) + '.xlsx' );
 		}
 
 		function disablePagination() {
