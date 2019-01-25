@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.1.2 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.1.3 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -48,15 +48,17 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 			orderByFilter = $filter( 'orderBy' );
 
 		/*$scope.$list = [];
-		$scope.$totalItems = [];*/
-		$scope.$currentPage = 1;
-		$scope.$getRowNumber = getRowNumber;
-		//scope.$$element = undefined;
-		$scope.$exportToXls = exportToXls;
-		$scope.$disabledExportingButton = $attrs.ptExport === undefined;
-		$scope.$enabledPagination = true;
-		$scope.$disablePagination = disablePagination;
-		$scope.$enablePagination = enablePagination;
+		$scope.totalItems = [];*/
+		$scope.currentPage = 1;
+		$scope.enabledPagination = true;
+		$scope.disablePagination = disablePagination;
+		$scope.enablePagination = enablePagination;
+
+		$scope.getRowNumber = getRowNumber;
+		//scope.exportingTable = undefined;
+		$scope.exportToXls = exportToXls;
+		$scope.disabledExportingButton = $attrs.ptExport === undefined;
+
 		$scope.orderConfig = {
 			/*property: undefined,
 			desc: false*/
@@ -66,38 +68,37 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		$scope.getIconClass = getIconClass;
 
 		$scope.$watchCollection( $attrs.ptList, function( newArray ) {
-			$scope.$totalItems = newArray;
+			$scope.totalItems = newArray;
 			changeItems();
 		} );
-		$scope.$watch( '$currentPage', changeItems );
-		$scope.$watch( '$enabledPagination', changeItems );
+		$scope.$watch( 'currentPage', changeItems );
+		$scope.$watch( 'enabledPagination', changeItems );
 		$scope.$watchCollection( 'orderConfig', changeItems );
+
+		function disablePagination() {
+			$scope.enabledPagination = false;
+		}
+
+		function enablePagination() {
+			$scope.enabledPagination = true;
+		}
 
 		function getRowNumber( index ) {
 			var n = index + 1;
-			if ( $scope.$enabledPagination )
-				return ( $scope.$currentPage - 1 ) * uibPaginationConfig.itemsPerPage + n;
+			if ( $scope.enabledPagination )
+				return ( $scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + n;
 			return n;
 		}
 
 		function exportToXls() {
-			XLSX.writeFile( XLSX.utils.table_to_book( $scope.$$element ), ( $attrs.ptExport || 'Excel' ) + '.xlsx' );
-		}
-
-		function disablePagination() {
-			$scope.$enabledPagination = false;
-		}
-
-		function enablePagination() {
-			$scope.$enabledPagination = true;
+			XLSX.writeFile( XLSX.utils.table_to_book( $scope.exportingTable ), ( $attrs.ptExport || 'Excel' ) + '.xlsx' );
 		}
 
 		function sort( property ) {
 			var orderConfig = $scope.orderConfig;
 			if ( orderConfig.property == property ) {
-				if ( orderConfig.desc ) {
+				if ( orderConfig.desc )
 					property = undefined;
-				}
 				orderConfig.desc = !orderConfig.desc;
 			} else
 				orderConfig.desc = false;
@@ -115,10 +116,10 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 
 		function changeItems() {
 			var orderConfig = $scope.orderConfig,
-				totalItems = orderByFilter( $scope.$totalItems, orderConfig.property, orderConfig.desc );
-			if ( $scope.$enabledPagination ) {
+				totalItems = orderByFilter( $scope.totalItems, orderConfig.property, orderConfig.desc );
+			if ( $scope.enabledPagination ) {
 				var itemsPerPage = uibPaginationConfig.itemsPerPage;
-				$scope.$list = limitToFilter( totalItems, itemsPerPage, ( $scope.$currentPage - 1 ) * itemsPerPage );
+				$scope.$list = limitToFilter( totalItems, itemsPerPage, ( $scope.currentPage - 1 ) * itemsPerPage );
 			} else
 				$scope.$list = totalItems;
 		}
@@ -137,20 +138,19 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 					.end()
 				.end()
 				.find( 'tbody' )
-					.append( compileHtml( '<tr><td colspan="' + totalCols + '" ng-if="!$totalItems.length">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
+					.append( compileHtml( '<tr><td colspan="' + totalCols + '" ng-if="!totalItems.length">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
 
-			scope.$$element = iElement.get( 0 );
+			scope.exportingTable = iElement.get( 0 );
 
 			var parentEl = iElement.parent();
-			if ( parentEl.hasClass( 'table-responsive' ) ) {
+			if ( parentEl.hasClass( 'table-responsive' ) )
 				iElement = parentEl;
-			}
-			iElement.before( compileHtml( '<div class="clearfix" ng-show="$totalItems.length">' +
-				'<ul uib-pagination total-items="$totalItems.length" ng-model="$currentPage" class="pagination-pt-records pull-left" ng-show="$enabledPagination"></ul>' +
+			iElement.before( compileHtml( '<div class="clearfix" ng-show="totalItems.length">' +
+				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="pagination-pt-records pull-left" ng-show="enabledPagination"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
-				'<button type="button" class="btn btn-default" ng-click="$disablePagination()" ng-show="$enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="$enablePagination()" ng-show="!$enabledPagination"><span class="fas fa-undo"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="$exportToXls()" ng-disabled="$disabledExportingButton"><span class="fas fa-file-excel"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="disablePagination()" ng-show="enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="fas fa-undo"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="exportToXls()" ng-disabled="disabledExportingButton"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
 				'</div>' ) );
 
@@ -184,7 +184,7 @@ function ptItem( compilerPostLink ) {
 
 	function compile( tElement, tAttrs ) {
 		tAttrs.$set( 'ngRepeat', ( tElement.attr( getAttrName( tAttrs, 'ptItem' ) ) || '$item' ) + ' in $list' );
-		tElement.prepend( '<td class="text-right">{{$getRowNumber($index) | number}}</td>' );
+		tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
 
 		return compilerPostLink( 'ptItem', tElement, tAttrs );
 	}
