@@ -38,7 +38,7 @@
 						<tr pt-item="item">
 							<td>{{item.string}}</td>
 							<td class="text-right">{{item.number | number}}</td>
-							<td>{{item.date | date}}</td>
+							<td>{{item.date | date:'MM/dd/y'}}</td>
 							<td ng-init="bool=item.boolean">
 								<span class="glyphicon" ng-class="['glyphicon-'+(bool?'ok':'remove'),'text-'+(bool?'success':'danger')]"></span>
 								<span class="hidden">{{bool?'Y':'N'}}</span>

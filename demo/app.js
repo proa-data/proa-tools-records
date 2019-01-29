@@ -12,11 +12,15 @@ function DemoController() {
 
 	function load() {
 		var N_TOTAL = chance.natural( { max: 1000 } ),
-			list = [];
+			list = [],
+			FLOATING_MAX = 10000;
 		for ( var i = 0; i < N_TOTAL; i++ ) {
 			list.push( {
 				string: chance.string(),
-				number: chance.integer(),
+				number: chance.floating( {
+					min: -FLOATING_MAX,
+					max: FLOATING_MAX
+				} ),
 				date: chance.date(),
 				boolean: chance.bool()
 			} );
