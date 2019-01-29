@@ -14,7 +14,7 @@ There are AngularJS directives as attributes and one simple HTML attr.:
 
 ### Pagination
 
-It can be disabled and restored (enabled) clicking a certain button.
+It can be disabled and restored (enabled) clicking a certain button. By default, at the beginning, activated; but it is possible to start disabled (with `pt-no-pagination` attribute).
 
 Both directives are required to paginate:
 

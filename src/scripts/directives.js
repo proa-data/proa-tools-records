@@ -21,7 +21,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		/*$scope.$list = [];
 		$scope.totalItems = [];*/
 		$scope.currentPage = 1;
-		$scope.enabledPagination = true;
+		$scope.enabledPagination = $attrs.ptNoPagination === undefined;
 		$scope.disablePagination = disablePagination;
 		$scope.enablePagination = enablePagination;
 
@@ -120,7 +120,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="pagination-pt-records pull-left" ng-show="enabledPagination"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
 				'<button type="button" class="btn btn-default" ng-click="disablePagination()" ng-show="enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="fas fa-undo"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="far fa-file"></span></button>' +
 				'<button type="button" class="btn btn-default" ng-click="exportToXls()" ng-disabled="disabledExportingButton"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
 				'</div>' ) );
