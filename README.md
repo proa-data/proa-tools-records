@@ -28,9 +28,9 @@ Represents an object name (defaults to `$item`) of the items. Put it in a `tr` a
 
 ### Data exporting
 
-It allows to get a Excel file from the currently-visible table data. It is optional and activated if `pt-export` attribute appears:
+It allows to get a Excel file from the currently-visible table data.
 
-#### `ptExport`
+#### `ptFilename`
 
 Contains the spreadsheet filename.
 

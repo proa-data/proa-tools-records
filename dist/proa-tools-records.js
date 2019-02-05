@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.2.0 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.3.0 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -57,7 +57,6 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		$scope.getRowNumber = getRowNumber;
 		//scope.exportingTable = undefined;
 		$scope.exportToXls = exportToXls;
-		$scope.disabledExportingButton = $attrs.ptExport === undefined;
 
 		$scope.orderConfig = {
 			/*property: undefined,
@@ -91,7 +90,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		}
 
 		function exportToXls() {
-			XLSX.writeFile( XLSX.utils.table_to_book( $scope.exportingTable ), ( $attrs.ptExport || 'Excel' ) + '.xlsx' );
+			XLSX.writeFile( XLSX.utils.table_to_book( $scope.exportingTable ), ( $attrs.ptFilename || 'Excel' ) + '.xlsx' );
 		}
 
 		function sort( property ) {
@@ -150,7 +149,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'<div class="btn-group pull-right" role="group">' +
 				'<button type="button" class="btn btn-default" ng-click="disablePagination()" ng-show="enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
 				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="far fa-file"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="exportToXls()" ng-disabled="disabledExportingButton"><span class="fas fa-file-excel"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="exportToXls()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
 				'</div>' ) );
 
