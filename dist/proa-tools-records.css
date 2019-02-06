@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.3.2 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.3.3 (https://github.com/proa-data/proa-tools-records)
  */
 
 .pagination.pagination-pt-records {
@@ -8,6 +8,7 @@
 .fa-stack.fa-stack-pt-records {
   height: 1em;
   line-height: 1;
+  vertical-align: sub;
   width: 1em;
 }
 .btn.btn-pt-records {

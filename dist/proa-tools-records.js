@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.3.2 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.3.3 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -54,8 +54,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 		$scope.totalItems = [];*/
 		$scope.currentPage = 1;
 		$scope.enabledPagination = $attrs.ptNoPagination === undefined;
-		$scope.disablePagination = disablePagination;
-		$scope.enablePagination = enablePagination;
+		$scope.togglePagination = togglePagination;
 
 		$scope.getRowNumber = getRowNumber;
 		//scope.exportingTable = undefined;
@@ -77,12 +76,8 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 		$scope.$watch( 'enabledPagination', changeItems );
 		$scope.$watchCollection( 'orderConfig', changeItems );
 
-		function disablePagination() {
-			$scope.enabledPagination = false;
-		}
-
-		function enablePagination() {
-			$scope.enabledPagination = true;
+		function togglePagination() {
+			$scope.enabledPagination = !$scope.enabledPagination;
 		}
 
 		function getRowNumber( index ) {
@@ -150,8 +145,10 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 			iElement.before( compileHtml( '<div class="clearfix" ng-show="totalItems.length">' +
 				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="enabledPagination"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
-				'<button type="button" class="btn btn-default" ng-click="disablePagination()" ng-show="enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="far fa-file"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="togglePagination()">' +
+				'<span class="fa-stack fa-stack-pt-records" ng-show="enabledPagination"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
+				'<span class="far fa-file" ng-show="!enabledPagination"></span>' +
+				'</button>' +
 				'<button type="button" class="btn btn-default" ng-click="exportToXls()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
 				'</div>' ) );
