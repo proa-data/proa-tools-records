@@ -197,8 +197,7 @@ function ptOrder( compilerPostLink ) {
 
 	function compile( tElement, tAttrs ) {
 		var ptOrder = tAttrs.ptOrder;
-		tElement.append( ' ' +
-			'<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
+		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
 			'<span class="glyphicon" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
 			'</button>' );
 
