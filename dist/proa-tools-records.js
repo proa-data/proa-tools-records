@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.3.0 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.3.1 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -14,8 +14,7 @@ function config( uibPaginationConfig ) {
 	//uibPaginationConfig.itemsPerPage = 10;
 	uibPaginationConfig.maxSize = 5;
 	uibPaginationConfig.forceEllipses = true;
-	uibPaginationConfig.previousText = '⯇';
-	uibPaginationConfig.nextText = '⯈';
+	uibPaginationConfig.previousText = uibPaginationConfig.nextText = null;
 	uibPaginationConfig.boundaryLinkNumbers = true;
 }
 } )();
@@ -30,12 +29,16 @@ angular
 ( function() {
 angular
 	.module( 'proaTools.records' )
+	.constant( 'PT_PAGINATION_CLASS_NAME', 'pagination-pt-records' )
 	.directive( 'ptList', ptList )
+	.factory( 'getPaginationBtnDirectiveOptions', getPaginationBtnDirectiveOptions )
+	.directive( 'paginationPrev', paginationPrev )
+	.directive( 'paginationNext', paginationNext )
 	.factory( 'compilerPostLink', compilerPostLink )
 	.directive( 'ptItem', ptItem )
 	.directive( 'ptOrder', ptOrder );
 
-function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
+function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_CLASS_NAME, $compile ) {
 	return {
 		restrict: 'A',
 		scope: true,
@@ -145,7 +148,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 			if ( parentEl.hasClass( 'table-responsive' ) )
 				iElement = parentEl;
 			iElement.before( compileHtml( '<div class="clearfix" ng-show="totalItems.length">' +
-				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="pagination-pt-records pull-left" ng-show="enabledPagination"></ul>' +
+				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="enabledPagination"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
 				'<button type="button" class="btn btn-default" ng-click="disablePagination()" ng-show="enabledPagination"><span class="fa-stack fa-stack-pt-records"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span></button>' +
 				'<button type="button" class="btn btn-default" ng-click="enablePagination()" ng-show="!enabledPagination"><span class="far fa-file"></span></button>' +
@@ -158,6 +161,28 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 			}
 		};
 	}
+}
+
+function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME ) {
+	return function( isNext ) {
+		return {
+			restrict: 'C',
+			link: link
+		};
+
+		function link( scope, iElement ) {
+			if ( iElement.parent( '.pagination.' + PT_PAGINATION_CLASS_NAME ).length )
+				iElement.children( 'a' ).html( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' );
+		}
+	};
+}
+
+function paginationPrev( getPaginationBtnDirectiveOptions ) {
+	return getPaginationBtnDirectiveOptions();
+}
+
+function paginationNext( getPaginationBtnDirectiveOptions ) {
+	return getPaginationBtnDirectiveOptions( true );
 }
 
 function compilerPostLink( $compile ) {
