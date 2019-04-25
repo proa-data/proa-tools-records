@@ -80,7 +80,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 
 		function getIconClass( property ) {
 			var orderConfig = $scope.orderConfig;
-			return 'glyphicon-' + ( orderConfig.property == property ? 'arrow-' + ( orderConfig.desc ? 'down' : 'up' ) : 'sort' );
+			return 'fa-sort' + ( orderConfig.property == property ? '-' + ( orderConfig.desc ? 'down' : 'up' ) : '' );
 		}
 
 		function changeItems() {
@@ -195,7 +195,7 @@ function ptOrder( compilerPostLink ) {
 	function compile( tElement, tAttrs ) {
 		var ptOrder = tAttrs.ptOrder;
 		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
-			'<span class="glyphicon" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
+			'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
 			'</button>' );
 
 		return compilerPostLink( 'ptOrder', tElement, tAttrs );
