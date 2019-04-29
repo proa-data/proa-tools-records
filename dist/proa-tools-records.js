@@ -160,16 +160,16 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 	}
 }
 
-function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME ) {
+function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME, $compile ) {
 	return function( isNext ) {
 		return {
 			restrict: 'C',
-			link: link
+			link: link // No compile function because of UI Bootstrap register
 		};
 
 		function link( scope, iElement ) {
 			if ( iElement.parent( '.pagination.' + PT_PAGINATION_CLASS_NAME ).length )
-				iElement.children( 'a' ).html( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' );
+				iElement.children( 'a' ).html( $compile( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' )( scope ) );
 		}
 	};
 }
