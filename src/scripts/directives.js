@@ -6,7 +6,7 @@ angular
 	.factory( 'getPaginationBtnDirectiveOptions', getPaginationBtnDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
-	.factory( 'compilerPostLink', compilerPostLink )
+	.factory( 'getDirectiveAutocompileFunction', getDirectiveAutocompileFunction )
 	.directive( 'ptItem', ptItem )
 	.directive( 'ptOrder', ptOrder );
 
@@ -154,52 +154,44 @@ function paginationNext( getPaginationBtnDirectiveOptions ) {
 	return getPaginationBtnDirectiveOptions( true );
 }
 
-function compilerPostLink( $compile ) {
-	return function( attrName, tElement, tAttrs ) {
-		tElement.removeAttr( getAttrName( tAttrs, attrName ) );
-		var compileElement = $compile( tElement );
-		return postLink;
-
-		function postLink( scope ) {
-			compileElement( scope );
-		}
+function getDirectiveAutocompileFunction( $compile ) {
+	return function( transformation ) {
+		return function( tElement, tAttrs ) {
+			transformation( tElement, tAttrs );
+			return function( scope, iElement, tAttrs ) {
+				iElement.removeAttr( getAttrName( tAttrs, this.name ) );
+				$compile( iElement )( scope );
+			};
+		};
 	};
 }
 
-function ptItem( compilerPostLink ) {
+function ptItem( getDirectiveAutocompileFunction ) {
 	return {
 		restrict: 'A',
 		require: '^^ptList',
 		terminal: true,
 		priority: 1000,
-		compile: compile
+		compile: getDirectiveAutocompileFunction( function( tElement, tAttrs ) {
+			tAttrs.$set( 'ngRepeat', ( tElement.attr( getAttrName( tAttrs, 'ptItem' ) ) || '$item' ) + ' in $list' );
+			tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
+		} )
 	};
-
-	function compile( tElement, tAttrs ) {
-		tAttrs.$set( 'ngRepeat', ( tElement.attr( getAttrName( tAttrs, 'ptItem' ) ) || '$item' ) + ' in $list' );
-		tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
-
-		return compilerPostLink( 'ptItem', tElement, tAttrs );
-	}
 }
 
-function ptOrder( compilerPostLink ) {
+function ptOrder( getDirectiveAutocompileFunction ) {
 	return {
 		restrict: 'A',
 		require: '^^ptList',
 		terminal: true,
 		priority: 1000,
-		compile: compile
+		compile: getDirectiveAutocompileFunction( function( tElement, tAttrs ) {
+			var ptOrder = tAttrs.ptOrder;
+			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
+				'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
+				'</button>' );
+		} )
 	};
-
-	function compile( tElement, tAttrs ) {
-		var ptOrder = tAttrs.ptOrder;
-		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
-			'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
-			'</button>' );
-
-		return compilerPostLink( 'ptOrder', tElement, tAttrs );
-	}
 }
 
 function getAttrName( attrs, name ) {
