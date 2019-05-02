@@ -35,8 +35,11 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr pt-item="item">
-							<td>{{item.string}}</td>
+						<tr pt-item="item" pt-item-manage="vm.manage">
+							<td>
+								<span pt-item-manage-output>{{item.string}}</span>
+								<input type="text" class="form-control" ng-model="item.string" pt-item-manage-input>
+							</td>
 							<td class="text-right">{{item.number | number}}</td>
 							<td>{{item.date | date:'shortDate'}}</td>
 							<td ng-init="bool=item.boolean">

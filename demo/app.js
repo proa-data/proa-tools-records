@@ -3,12 +3,26 @@ angular
 	.module( 'app', [ 'proaTools.records' ] )
 	.controller( 'DemoController', DemoController );
 
-function DemoController() {
+function DemoController( $timeout ) {
 	var vm = this;
 	vm.list = [];
 	vm.xlsFilename = 'Example file';
 	vm.load = load;
 	vm.empty = empty;
+	vm.manage = {
+		edit: function( newItem, oldItem ) {
+			console.info( 'Item (with new string "' + newItem.string + '" and old "' + oldItem.string + '") is edited.' );
+		},
+		delete: function( item ) {
+			console.info( 'Deleting item...' );
+			return new Promise( function( resolve ) {
+				$timeout( function() {
+					resolve();
+					console.info( 'Item (with string "' + item.string + '") has been deleted.' );
+				}, 1000 );
+			} );
+		}
+	};
 
 	function load() {
 		var N_TOTAL = chance.natural( { max: 1000 } ),
