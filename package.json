@@ -1,7 +1,7 @@
 {
   "name": "proa-tools-records",
   "version": "1.4.0",
-  "description": "Control (pagination, management and ordering) of records within tables using mainly AngularJS and Bootstrap 3.",
+  "description": "Control (pagination, ordering, data exporting and management) of records within tables using mainly AngularJS and Bootstrap 3.",
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

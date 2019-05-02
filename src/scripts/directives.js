@@ -1,46 +1,32 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.constant( 'PT_PAGINATION_CLASS_NAME', 'pagination-pt-records' )
-	.factory( 'getItemIndex', getItemIndex )
 	.directive( 'ptList', ptList )
-	.factory( 'getPaginationBtnDirectiveOptions', getPaginationBtnDirectiveOptions )
+	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
-	.factory( 'getDirectiveAutocompileFunction', getDirectiveAutocompileFunction )
-	.constant( 'PT_CONFIG', {
-		deletionConfirmation: function() {
-			return confirm( 'Do you really want to delete?' );
-		}
-	} )
+	.directive( 'ptOrder', ptOrder )
 	.directive( 'ptItem', ptItem )
-	.factory( 'getItemManageDirectiveOptions', getItemManageDirectiveOptions )
+	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
-	.directive( 'ptItemManageInput', ptItemManageInput )
-	.directive( 'ptOrder', ptOrder );
+	.directive( 'ptItemManageInput', ptItemManageInput );
 
-function getItemIndex( uibPaginationConfig ) {
-	return function( scope, index ) {
-		if ( scope.enabledPagination )
-			return ( scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + index;
-		return index;
-	};
-}
+var PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
 
-function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_CLASS_NAME, $compile ) {
+function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 	return {
 		restrict: 'A',
 		scope: true,
-		controller: ItemsController,
+		controller: ListController,
 		compile: compile
 	};
 
-	function ItemsController( $scope, $attrs ) {
+	function ListController( $scope, $attrs ) {
 		var limitToFilter = $filter( 'limitTo' ),
 			orderByFilter = $filter( 'orderBy' );
 
-		/*$scope.$list = [];
-		$scope.totalItems = [];*/
+		$scope.$list = [];
+		$scope.totalItems = [];
 		$scope.currentPage = 1;
 		$scope.enabledPagination = $attrs.ptNoPagination === undefined;
 		$scope.togglePagination = togglePagination;
@@ -50,8 +36,8 @@ function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, P
 		$scope.exportToXls = exportToXls;
 
 		$scope.orderConfig = {
-			/*property: undefined,
-			desc: false*/
+			//property: undefined,
+			desc: false
 		};
 		$scope.sort = sort;
 		$scope.isActive = isActive;
@@ -70,7 +56,7 @@ function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, P
 		}
 
 		function getRowNumber( index ) {
-			return getItemIndex( $scope, index ) + 1;
+			return getPtItemIndex( $scope, index ) + 1;
 		}
 
 		function exportToXls() {
@@ -121,7 +107,7 @@ function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, P
 					.end()
 				.end()
 				.find( 'tbody' )
-					.append( compileHtml( '<tr><td colspan="' + totalCols + '" ng-if="!totalItems.length">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
+					.append( compileHtml( '<tr ng-if="!totalItems.length"><td colspan="' + totalCols + '">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
 
 			scope.exportingTable = iElement.get( 0 );
 
@@ -132,8 +118,8 @@ function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, P
 				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="enabledPagination"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
 				'<button type="button" class="btn btn-default" ng-click="togglePagination()">' +
-				'<span class="fa-stack fa-stack-pt-records" ng-show="enabledPagination"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
-				'<span class="far fa-file" ng-show="!enabledPagination"></span>' +
+				'<span class="fa-stack fa-stack-pt-records" ng-if="enabledPagination"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
+				'<span class="far fa-file" ng-if="!enabledPagination"></span>' +
 				'</button>' +
 				'<button type="button" class="btn btn-default" ng-click="exportToXls()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
@@ -146,7 +132,7 @@ function ptList( $filter, getItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, P
 	}
 }
 
-function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME, $compile ) {
+function getPaginationDirectiveOptions( $compile ) {
 	return function( isNext ) {
 		return {
 			restrict: 'C',
@@ -160,57 +146,56 @@ function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME, $compile ) 
 	};
 }
 
-function paginationPrev( getPaginationBtnDirectiveOptions ) {
-	return getPaginationBtnDirectiveOptions();
+function paginationPrev( getPaginationDirectiveOptions ) {
+	return getPaginationDirectiveOptions();
 }
 
-function paginationNext( getPaginationBtnDirectiveOptions ) {
-	return getPaginationBtnDirectiveOptions( true );
+function paginationNext( getPaginationDirectiveOptions ) {
+	return getPaginationDirectiveOptions( true );
 }
 
-function getDirectiveAutocompileFunction( $compile ) {
-	return function( transformation, scopeLinking ) {
-		return function( tElement, tAttrs ) {
-			transformation( tElement, tAttrs );
-			return function( scope, iElement, tAttrs ) {
-				if ( scopeLinking )
-					scopeLinking( scope, iElement, tAttrs );
-
-				iElement.removeAttr( getAttrName( tAttrs, this.name ) );
-				$compile( iElement )( scope );
-			};
-		};
+function ptOrder( getAntiloopDirectiveCompileOption ) {
+	return {
+		restrict: 'A',
+		terminal: true,
+		priority: 1000,
+		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
+			var ptOrder = tAttrs.ptOrder;
+			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
+				'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
+				'</button>' );
+		} )
 	};
 }
 
-function ptItem( getDirectiveAutocompileFunction, PT_CONFIG, getItemIndex ) {
-	var manageScopeName = '$manage';
+function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIndex ) {
+	var manageAttrName = 'ptItemManage',
+		manageScopeName = '$manage';
 
 	return {
 		restrict: 'A',
-		require: '^^ptList',
 		terminal: true,
 		priority: 1000,
-		compile: getDirectiveAutocompileFunction( function( tElement, tAttrs ) {
+		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
 			var itemScopeName = tAttrs.ptItem || '$item';
 
 			tAttrs.$set( 'ngRepeat', itemScopeName + ' in $list' );
 			tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
 
-			var pimScopeName = tAttrs.ptItemManage;
+			var pimScopeName = tAttrs[ manageAttrName ];
 			if ( pimScopeName )
 				tElement.append( '<td>' +
-					'<div class="btn-group" role="group" ng-if="!' + itemScopeName + '.$editing">' +
+					'<div class="btn-group" role="group" ng-show="!' + itemScopeName + '.$editing">' +
 					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$startEdition($index)" ng-if="' + pimScopeName + '.edit"><span class="fas fa-edit"></span></button>' +
 					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$delete($index)" ng-if="' + pimScopeName + '.delete"><span class="fas fa-trash"></span></button>' +
 					'</div>' +
-					'<div class="btn-group" role="group" ng-if="' + itemScopeName + '.$editing">' +
+					'<div class="btn-group" role="group" ng-if="' + pimScopeName + '.edit" ng-show="' + itemScopeName + '.$editing">' +
 					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$edit($index)"><span class="fas fa-check"></span></button>' +
 					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$cancelEdition($index)"><span class="fas fa-times"></span></button>' +
 					'</div>' +
 					'</td>' );
 		}, function( scope, iElement, iAttrs ) {
-			var itemManageOptions = scope.$eval( iAttrs.ptItemManage );
+			var itemManageOptions = scope.$eval( iAttrs[ manageAttrName ] );
 
 			if ( !itemManageOptions )
 				return;
@@ -221,6 +206,7 @@ function ptItem( getDirectiveAutocompileFunction, PT_CONFIG, getItemIndex ) {
 				$edit: $edit,
 				$cancelEdition: $cancelEdition
 			};
+			scope.$isEditing = $isEditing;
 
 			function $startEdition( index ) {
 				var item = getItem( index );
@@ -229,10 +215,10 @@ function ptItem( getDirectiveAutocompileFunction, PT_CONFIG, getItemIndex ) {
 			}
 
 			function $delete( index ) {
-				if ( PT_CONFIG.deletionConfirmation() )
+				if ( confirmDeletion() )
 					executeAfterPromise( itemManageOptions.delete( getItem( index ) ), function() {
 						scope.$apply( function() {
-							scope.totalItems.splice( getItemIndex( scope, index ), 1 );
+							scope.totalItems.splice( getPtItemIndex( scope, index ), 1 );
 						} );
 					} );
 			}
@@ -261,8 +247,12 @@ function ptItem( getDirectiveAutocompileFunction, PT_CONFIG, getItemIndex ) {
 				endEdition( index );
 			}
 
+			function $isEditing( index ) {
+				return getItem( index ).$editing;
+			}
+
 			function getItem( index ) {
-				return scope.totalItems[ getItemIndex( scope, index ) ];
+				return scope.totalItems[ getPtItemIndex( scope, index ) ];
 			}
 
 			function executeAfterPromise( promise, execute ) {
@@ -283,42 +273,22 @@ function ptItem( getDirectiveAutocompileFunction, PT_CONFIG, getItemIndex ) {
 	};
 }
 
-function getItemManageDirectiveOptions( getDirectiveAutocompileFunction ) {
+function getPtItemManageDirectiveOptions( getAntiloopDirectiveCompileOption ) {
 	return function( isInput ) {
 		return {
 			restrict: 'A',
-			require: '^^ptList',
-			compile: getDirectiveAutocompileFunction( function( tElement, tAttrs ) {
-				tAttrs.$set( 'ngIf', ( isInput ? '' : '!' ) + tElement.parents( '[pt-item-manage]' ).attr( 'ng-repeat' ).split( ' in ' )[ 0 ] + '.$editing' );
+			compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
+				tAttrs.$set( 'ngShow', ( isInput ? '' : '!' ) + '$isEditing($index)' );
 			} )
 		};
 	};
 }
 
-function ptItemManageOutput( getItemManageDirectiveOptions ) {
-	return getItemManageDirectiveOptions();
+function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions();
 }
 
-function ptItemManageInput( getItemManageDirectiveOptions ) {
-	return getItemManageDirectiveOptions( true );
-}
-
-function ptOrder( getDirectiveAutocompileFunction ) {
-	return {
-		restrict: 'A',
-		require: '^^ptList',
-		terminal: true,
-		priority: 1000,
-		compile: getDirectiveAutocompileFunction( function( tElement, tAttrs ) {
-			var ptOrder = tAttrs.ptOrder;
-			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
-				'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
-				'</button>' );
-		} )
-	};
-}
-
-function getAttrName( attrs, name ) {
-	return attrs.$attr[ name ];
+function ptItemManageInput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions( true );
 }
 } )();
