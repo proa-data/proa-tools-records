@@ -35,6 +35,7 @@ angular
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
 	.directive( 'ptOrder', ptOrder )
+	.directive( 'ptOrderInit', ptOrderInit )
 	.directive( 'ptItem', ptItem )
 	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
@@ -193,8 +194,31 @@ function ptOrder( getAntiloopDirectiveCompileOption ) {
 			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
 				'<span class="fas" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
 				'</button>' );
+		}, function( scope, iElement, iAttrs ) {
+			if ( iAttrs.ptOrderInit )
+				scope.$initialOrderedProperty = iAttrs.ptOrder;
 		} )
 	};
+}
+
+function ptOrderInit() {
+	return {
+		restrict: 'A',
+		link: link
+	};
+
+	function link( scope, iElement, iAttrs ) {
+		switch ( iAttrs[ this.name ] ) {
+		case 'asc':
+			sort();
+		case 'desc':
+			sort();
+		}
+
+		function sort() {
+			scope.sort( scope.$initialOrderedProperty );
+		}
+	}
 }
 
 function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIndex ) {
