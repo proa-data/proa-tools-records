@@ -1,17 +1,8 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getPtItemIndex', getPtItemIndex )
 	.factory( 'getAntiloopDirectiveCompileOption', getAntiloopDirectiveCompileOption )
 	.factory( 'confirmDeletion', confirmDeletion );
-
-function getPtItemIndex( uibPaginationConfig ) {
-	return function( scope, index ) {
-		if ( scope.enabledPagination )
-			return ( scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + index;
-		return index;
-	};
-}
 
 function getAntiloopDirectiveCompileOption( $compile ) {
 	return function( domTransformation, scopeLinking ) {

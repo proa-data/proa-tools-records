@@ -41,9 +41,10 @@ angular
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
 	.directive( 'ptItemManageInput', ptItemManageInput );
 
-var PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
+var indexScopeName = '$index',
+	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
 
-function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
+function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 	return {
 		restrict: 'A',
 		scope: true,
@@ -77,6 +78,9 @@ function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS,
 
 		function activate() {
 			$scope.$watchCollection( $attrs.ptList, function( newArray ) {
+				angular.forEach( newArray, function( item, i ) {
+					item[ indexScopeName ] = i;
+				} );
 				$scope.totalItems = newArray;
 				changeItems();
 			} );
@@ -90,7 +94,9 @@ function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS,
 		}
 
 		function getRowNumber( index ) {
-			return getPtItemIndex( $scope, index ) + 1;
+			if ( $scope.enabledPagination )
+				index = ( $scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + index;
+			return index + 1;
 		}
 
 		function exportToXls() {
@@ -225,7 +231,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIndex ) {
+function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 	var manageAttrName = 'ptItemManage',
 		privyManageScopeName = '$manage';
 
@@ -272,12 +278,14 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIn
 			}
 
 			function $delete( index ) {
-				if ( confirmDeletion() )
-					executeAfterPromise( itemManageOptions.delete( getItem( index ) ), function() {
+				if ( confirmDeletion() ) {
+					var item = getItem( index );
+					executeAfterPromise( itemManageOptions.delete( item ), function() {
 						scope.$apply( function() {
-							scope.totalItems.splice( getPtItemIndex( scope, index ), 1 );
+							scope.totalItems.splice( item[ indexScopeName ], 1 );
 						} );
 					} );
+				}
 			}
 
 			function $edit( index ) {
@@ -309,7 +317,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIn
 			}
 
 			function getItem( index ) {
-				return scope.totalItems[ getPtItemIndex( scope, index ) ];
+				return scope.$list[ index ];
 			}
 
 			function executeAfterPromise( promise, execute ) {
@@ -352,17 +360,8 @@ function ptItemManageInput( getPtItemManageDirectiveOptions ) {
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getPtItemIndex', getPtItemIndex )
 	.factory( 'getAntiloopDirectiveCompileOption', getAntiloopDirectiveCompileOption )
 	.factory( 'confirmDeletion', confirmDeletion );
-
-function getPtItemIndex( uibPaginationConfig ) {
-	return function( scope, index ) {
-		if ( scope.enabledPagination )
-			return ( scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + index;
-		return index;
-	};
-}
 
 function getAntiloopDirectiveCompileOption( $compile ) {
 	return function( domTransformation, scopeLinking ) {
