@@ -41,7 +41,7 @@
 								<input type="text" class="form-control" ng-model="item.string" pt-item-manage-input>
 							</td>
 							<td class="text-right">{{item.number | number}}</td>
-							<td>{{item.date | date:'mediumDate'}}</td>
+							<td>{{item.date | date:'medium'}}</td>
 							<td ng-init="bool=item.boolean">
 								<span class="fas" ng-class="['fa-'+(bool?'check':'times'),'text-'+(bool?'success':'danger')]"></span>
 								<span class="hidden">{{bool?'Y':'N'}}</span>
