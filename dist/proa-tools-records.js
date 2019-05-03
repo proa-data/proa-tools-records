@@ -47,11 +47,11 @@ function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS,
 	return {
 		restrict: 'A',
 		scope: true,
-		controller: ListController,
+		controller: PtListController,
 		compile: compile
 	};
 
-	function ListController( $scope, $attrs ) {
+	function PtListController( $scope, $attrs ) {
 		var limitToFilter = $filter( 'limitTo' ),
 			orderByFilter = $filter( 'orderBy' );
 
@@ -73,13 +73,17 @@ function ptList( $filter, getPtItemIndex, uibPaginationConfig, PT_RECORDS_TEXTS,
 		$scope.isActive = isActive;
 		$scope.getIconClass = getIconClass;
 
-		$scope.$watchCollection( $attrs.ptList, function( newArray ) {
-			$scope.totalItems = newArray;
-			changeItems();
-		} );
-		$scope.$watch( 'currentPage', changeItems );
-		$scope.$watch( 'enabledPagination', changeItems );
-		$scope.$watchCollection( 'orderConfig', changeItems );
+		activate();
+
+		function activate() {
+			$scope.$watchCollection( $attrs.ptList, function( newArray ) {
+				$scope.totalItems = newArray;
+				changeItems();
+			} );
+			$scope.$watch( 'currentPage', changeItems );
+			$scope.$watch( 'enabledPagination', changeItems );
+			$scope.$watchCollection( 'orderConfig', changeItems );
+		}
 
 		function togglePagination() {
 			$scope.enabledPagination = !$scope.enabledPagination;
@@ -209,9 +213,9 @@ function ptOrderInit() {
 
 	function link( scope, iElement, iAttrs ) {
 		switch ( iAttrs[ this.name ] ) {
-		case 'asc':
-			sort();
 		case 'desc':
+			sort();
+		case 'asc':
 			sort();
 		}
 
@@ -223,7 +227,7 @@ function ptOrderInit() {
 
 function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIndex ) {
 	var manageAttrName = 'ptItemManage',
-		manageScopeName = '$manage';
+		privyManageScopeName = '$manage';
 
 	return {
 		restrict: 'A',
@@ -235,16 +239,16 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIn
 			tAttrs.$set( 'ngRepeat', itemScopeName + ' in $list' );
 			tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
 
-			var pimScopeName = tAttrs[ manageAttrName ];
-			if ( pimScopeName )
+			var customManageScopeName = tAttrs[ manageAttrName ];
+			if ( customManageScopeName )
 				tElement.append( '<td>' +
 					'<div class="btn-group" role="group" ng-show="!' + itemScopeName + '.$editing">' +
-					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$startEdition($index)" ng-if="' + pimScopeName + '.edit"><span class="fas fa-edit"></span></button>' +
-					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$delete($index)" ng-if="' + pimScopeName + '.delete"><span class="fas fa-trash"></span></button>' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$startEdition($index)" ng-if="' + customManageScopeName + '.edit"><span class="fas fa-edit"></span></button>' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$delete($index)" ng-if="' + customManageScopeName + '.delete"><span class="fas fa-trash"></span></button>' +
 					'</div>' +
-					'<div class="btn-group" role="group" ng-if="' + pimScopeName + '.edit" ng-show="' + itemScopeName + '.$editing">' +
-					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$edit($index)"><span class="fas fa-check"></span></button>' +
-					'<button type="button" class="btn btn-default" ng-click="' + manageScopeName + '.$cancelEdition($index)"><span class="fas fa-times"></span></button>' +
+					'<div class="btn-group" role="group" ng-if="' + customManageScopeName + '.edit" ng-show="' + itemScopeName + '.$editing">' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$edit($index)"><span class="fas fa-check"></span></button>' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$cancelEdition($index)"><span class="fas fa-times"></span></button>' +
 					'</div>' +
 					'</td>' );
 		}, function( scope, iElement, iAttrs ) {
@@ -253,7 +257,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion, getPtItemIn
 			if ( !itemManageOptions )
 				return;
 
-			scope[ manageScopeName ] = {
+			scope[ privyManageScopeName ] = {
 				$startEdition: $startEdition,
 				$delete: $delete,
 				$edit: $edit,
