@@ -3,7 +3,7 @@ angular
 	.module( 'app', [ 'proaTools.records' ] )
 	.controller( 'DemoController', DemoController );
 
-function DemoController( $timeout ) {
+function DemoController( $http ) {
 	var vm = this;
 	vm.list = [];
 	vm.manage = {
@@ -20,11 +20,8 @@ function DemoController( $timeout ) {
 
 	function deleteItem( item ) {
 		console.info( 'Deleting item...' );
-		return new Promise( function( resolve ) {
-			$timeout( function() {
-				resolve();
-				console.info( 'Item (with string "' + item.string + '") has been deleted.' );
-			}, 1000 );
+		return $http.get( './' ).then( function() {
+			console.info( 'Item (with string "' + item.string + '") has been deleted.' );
 		} );
 	}
 

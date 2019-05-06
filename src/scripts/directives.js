@@ -271,7 +271,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			}
 
 			function $edit( index ) {
-				var newItem = angular.copy( getItem( index ) ),
+				var newItem = getItem( index ),
 					oldItem = newItem[ OLD_ITEM_SCOPE_NAME ];
 				delete newItem[ OLD_ITEM_SCOPE_NAME ];
 				delete newItem[ EDITING_ITEM_SCOPE_NAME ];
@@ -303,11 +303,9 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			}
 
 			function executeAfterPromise( promise, execute ) {
-				if ( promise )
+				if ( promise && promise.then )
 					promise.then( function() {
-						scope.$apply( function() {
-							execute();
-						} );
+						execute();
 					} );
 				else
 					execute();
