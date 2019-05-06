@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.5.1 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.5.2 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -294,9 +294,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 				if ( confirmDeletion() ) {
 					var item = getItem( index );
 					executeAfterPromise( itemManageOptions.delete( item ), function() {
-						scope.$apply( function() {
-							scope[ TOTAL_LIST_SCOPE_NAME ].splice( item[ INDEX_SCOPE_NAME ], 1 );
-						} );
+						scope[ TOTAL_LIST_SCOPE_NAME ].splice( item[ INDEX_SCOPE_NAME ], 1 );
 					} );
 				}
 			}
@@ -336,7 +334,9 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			function executeAfterPromise( promise, execute ) {
 				if ( promise )
 					promise.then( function() {
-						execute();
+						scope.$apply( function() {
+							execute();
+						} );
 					} );
 				else
 					execute();
