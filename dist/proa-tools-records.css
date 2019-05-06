@@ -5,14 +5,14 @@
 .pagination.pagination-pt-records {
   margin: 0;
 }
+.btn.btn-pt-records {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-left: 1em;
+}
 .fa-stack.fa-stack-pt-records {
   height: 1em;
   line-height: 1;
   vertical-align: sub;
   width: 1em;
-}
-.btn.btn-pt-records {
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-left: 1em;
 }

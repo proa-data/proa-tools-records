@@ -1,70 +1,96 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.constant( 'PT_PAGINATION_CLASS_NAME', 'pagination-pt-records' )
 	.directive( 'ptList', ptList )
-	.factory( 'getPaginationBtnDirectiveOptions', getPaginationBtnDirectiveOptions )
+	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
-	.factory( 'compilerPostLink', compilerPostLink )
+	.directive( 'ptOrder', ptOrder )
+	.directive( 'ptOrderInit', ptOrderInit )
 	.directive( 'ptItem', ptItem )
-	.directive( 'ptOrder', ptOrder );
+	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
+	.directive( 'ptItemManageOutput', ptItemManageOutput )
+	.directive( 'ptItemManageInput', ptItemManageInput );
 
-function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_CLASS_NAME, $compile ) {
+var LIST_SCOPE_NAME = '$list',
+	TOTAL_LIST_SCOPE_NAME = '$totalList',
+	GET_ROW_NUMBER_SCOPE_NAME = '$getRowNumber',
+	SORT_SCOPE_NAME = '$sort',
+	IS_ACTIVE_SCOPE_NAME = '$isActive',
+	GET_ICON_CLASS_SCOPE_NAME = '$getIconClass',
+	INDEX_SCOPE_NAME = '$index',
+	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records',
+	EDITING_ITEM_SCOPE_NAME = '$editing',
+	OLD_ITEM_SCOPE_NAME = '$old';
+
+function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
+	var CURRENT_PAGE_SCOPE_NAME = '$currentPage',
+		ENABLED_PAGINATION_SCOPE_NAME = '$enabledPagination',
+		TOGGLE_PAGINATION_SCOPE_NAME = '$togglePagination',
+		EXPORTING_TABLE_SCOPE_NAME = '$exportingTable',
+		EXPORT_TO_XLS_SCOPE_NAME = '$exportToXls';
+
 	return {
 		restrict: 'A',
 		scope: true,
-		controller: ItemsController,
+		controller: PtListController,
 		compile: compile
 	};
 
-	function ItemsController( $scope, $attrs ) {
+	function PtListController( $scope, $attrs ) {
 		var limitToFilter = $filter( 'limitTo' ),
 			orderByFilter = $filter( 'orderBy' );
 
-		/*$scope.$list = [];
-		$scope.totalItems = [];*/
-		$scope.currentPage = 1;
-		$scope.enabledPagination = $attrs.ptNoPagination === undefined;
-		$scope.togglePagination = togglePagination;
+		$scope[ LIST_SCOPE_NAME ] = [];
+		$scope[ TOTAL_LIST_SCOPE_NAME ] = [];
+		$scope[ CURRENT_PAGE_SCOPE_NAME ] = 1;
+		$scope[ ENABLED_PAGINATION_SCOPE_NAME ] = $attrs.ptNoPagination === undefined;
+		$scope[ TOGGLE_PAGINATION_SCOPE_NAME ] = togglePagination;
 
-		$scope.getRowNumber = getRowNumber;
-		//scope.exportingTable = undefined;
-		$scope.exportToXls = exportToXls;
+		$scope[ GET_ROW_NUMBER_SCOPE_NAME ] = getRowNumber;
+		//scope[ EXPORTING_TABLE_SCOPE_NAME ] = undefined;
+		$scope[ EXPORT_TO_XLS_SCOPE_NAME ] = exportToXls;
 
-		$scope.orderConfig = {
-			/*property: undefined,
-			desc: false*/
+		var orderConfig = {
+			//property: undefined,
+			desc: false
 		};
-		$scope.sort = sort;
-		$scope.isActive = isActive;
-		$scope.getIconClass = getIconClass;
+		$scope[ SORT_SCOPE_NAME ] = sort;
+		$scope[ IS_ACTIVE_SCOPE_NAME ] = isActive;
+		$scope[ GET_ICON_CLASS_SCOPE_NAME ] = getIconClass;
 
-		$scope.$watchCollection( $attrs.ptList, function( newArray ) {
-			$scope.totalItems = newArray;
-			changeItems();
-		} );
-		$scope.$watch( 'currentPage', changeItems );
-		$scope.$watch( 'enabledPagination', changeItems );
-		$scope.$watchCollection( 'orderConfig', changeItems );
+		activate();
+
+		function activate() {
+			$scope.$watchCollection( $attrs.ptList, function( newCollection ) {
+				angular.forEach( newCollection, function( item, i ) {
+					item[ INDEX_SCOPE_NAME ] = i;
+				} );
+				$scope[ TOTAL_LIST_SCOPE_NAME ] = newCollection;
+				changeItems();
+			} );
+			$scope.$watch( CURRENT_PAGE_SCOPE_NAME, changeItems );
+			$scope.$watch( ENABLED_PAGINATION_SCOPE_NAME, changeItems );
+			$scope.$watchCollection( function() {
+				return orderConfig;
+			}, changeItems );
+		}
 
 		function togglePagination() {
-			$scope.enabledPagination = !$scope.enabledPagination;
+			$scope[ ENABLED_PAGINATION_SCOPE_NAME ] = !$scope[ ENABLED_PAGINATION_SCOPE_NAME ];
 		}
 
 		function getRowNumber( index ) {
-			var n = index + 1;
-			if ( $scope.enabledPagination )
-				return ( $scope.currentPage - 1 ) * uibPaginationConfig.itemsPerPage + n;
-			return n;
+			if ( $scope[ ENABLED_PAGINATION_SCOPE_NAME ] )
+				index = ( $scope[ CURRENT_PAGE_SCOPE_NAME ] - 1 ) * uibPaginationConfig.itemsPerPage + index;
+			return index + 1;
 		}
 
 		function exportToXls() {
-			XLSX.writeFile( XLSX.utils.table_to_book( $scope.exportingTable ), ( $attrs.ptFilename || 'Excel' ) + '.xlsx' );
+			XLSX.writeFile( XLSX.utils.table_to_book( $scope[ EXPORTING_TABLE_SCOPE_NAME ] ), ( $attrs.ptFilename || 'Excel' ) + '.xlsx' );
 		}
 
 		function sort( property ) {
-			var orderConfig = $scope.orderConfig;
 			if ( orderConfig.property == property ) {
 				if ( orderConfig.desc )
 					property = undefined;
@@ -75,22 +101,20 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 		}
 
 		function isActive( property ) {
-			return $scope.orderConfig.property == property;
+			return orderConfig.property == property;
 		}
 
 		function getIconClass( property ) {
-			var orderConfig = $scope.orderConfig;
-			return 'glyphicon-' + ( orderConfig.property == property ? 'arrow-' + ( orderConfig.desc ? 'down' : 'up' ) : 'sort' );
+			return 'fa-sort' + ( orderConfig.property == property ? '-' + ( orderConfig.desc ? 'down' : 'up' ) : '' );
 		}
 
 		function changeItems() {
-			var orderConfig = $scope.orderConfig,
-				totalItems = orderByFilter( $scope.totalItems, orderConfig.property, orderConfig.desc );
-			if ( $scope.enabledPagination ) {
+			var totalList = orderByFilter( $scope[ TOTAL_LIST_SCOPE_NAME ], orderConfig.property, orderConfig.desc );
+			if ( $scope[ ENABLED_PAGINATION_SCOPE_NAME ] ) {
 				var itemsPerPage = uibPaginationConfig.itemsPerPage;
-				$scope.$list = limitToFilter( totalItems, itemsPerPage, ( $scope.currentPage - 1 ) * itemsPerPage );
-			} else
-				$scope.$list = totalItems;
+				totalList = limitToFilter( totalList, itemsPerPage, ( $scope[ CURRENT_PAGE_SCOPE_NAME ] - 1 ) * itemsPerPage );
+			}
+			$scope[ LIST_SCOPE_NAME ] = totalList;
 		}
 	}
 
@@ -107,21 +131,21 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 					.end()
 				.end()
 				.find( 'tbody' )
-					.append( compileHtml( '<tr><td colspan="' + totalCols + '" ng-if="!totalItems.length">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
+					.append( compileHtml( '<tr ng-if="!' + TOTAL_LIST_SCOPE_NAME + '.length"><td colspan="' + totalCols + '">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
 
-			scope.exportingTable = iElement.get( 0 );
+			scope[ EXPORTING_TABLE_SCOPE_NAME ] = iElement.get( 0 );
 
 			var parentEl = iElement.parent();
 			if ( parentEl.hasClass( 'table-responsive' ) )
 				iElement = parentEl;
-			iElement.before( compileHtml( '<div class="clearfix" ng-show="totalItems.length">' +
-				'<ul uib-pagination total-items="totalItems.length" ng-model="currentPage" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="enabledPagination"></ul>' +
+			iElement.before( compileHtml( '<div class="clearfix" ng-show="' + TOTAL_LIST_SCOPE_NAME + '.length">' +
+				'<ul uib-pagination total-items="' + TOTAL_LIST_SCOPE_NAME + '.length" ng-model="' + CURRENT_PAGE_SCOPE_NAME + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + ENABLED_PAGINATION_SCOPE_NAME + '"></ul>' +
 				'<div class="btn-group pull-right" role="group">' +
-				'<button type="button" class="btn btn-default" ng-click="togglePagination()">' +
-				'<span class="fa-stack fa-stack-pt-records" ng-show="enabledPagination"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
-				'<span class="far fa-file" ng-show="!enabledPagination"></span>' +
+				'<button type="button" class="btn btn-default" ng-click="' + TOGGLE_PAGINATION_SCOPE_NAME + '()">' +
+				'<span class="fa-stack fa-stack-pt-records" ng-if="' + ENABLED_PAGINATION_SCOPE_NAME + '"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
+				'<span class="far fa-file" ng-if="!' + ENABLED_PAGINATION_SCOPE_NAME + '"></span>' +
 				'</button>' +
-				'<button type="button" class="btn btn-default" ng-click="exportToXls()"><span class="fas fa-file-excel"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + EXPORT_TO_XLS_SCOPE_NAME + '()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
 				'</div>' ) );
 
@@ -132,77 +156,188 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, PT_PAGINATION_C
 	}
 }
 
-function getPaginationBtnDirectiveOptions( PT_PAGINATION_CLASS_NAME ) {
+function getPaginationDirectiveOptions( $compile ) {
 	return function( isNext ) {
 		return {
 			restrict: 'C',
-			link: link
+			link: link // No compile function because of UI Bootstrap register
 		};
 
 		function link( scope, iElement ) {
 			if ( iElement.parent( '.pagination.' + PT_PAGINATION_CLASS_NAME ).length )
-				iElement.children( 'a' ).html( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' );
+				iElement.children( 'a' ).html( $compile( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' )( scope ) );
 		}
 	};
 }
 
-function paginationPrev( getPaginationBtnDirectiveOptions ) {
-	return getPaginationBtnDirectiveOptions();
+function paginationPrev( getPaginationDirectiveOptions ) {
+	return getPaginationDirectiveOptions();
 }
 
-function paginationNext( getPaginationBtnDirectiveOptions ) {
-	return getPaginationBtnDirectiveOptions( true );
+function paginationNext( getPaginationDirectiveOptions ) {
+	return getPaginationDirectiveOptions( true );
 }
 
-function compilerPostLink( $compile ) {
-	return function( attrName, tElement, tAttrs ) {
-		tElement.removeAttr( getAttrName( tAttrs, attrName ) );
-		var compileElement = $compile( tElement );
-		return postLink;
+function ptOrder( getAntiloopDirectiveCompileOption ) {
+	return {
+		restrict: 'A',
+		terminal: true,
+		priority: 1000,
+		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
+			var ptOrder = tAttrs.ptOrder;
+			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + IS_ACTIVE_SCOPE_NAME + '(\'' + ptOrder + '\')}" ng-click="' + SORT_SCOPE_NAME + '(\'' + ptOrder + '\')">' +
+				'<span class="fas" ng-class="' + GET_ICON_CLASS_SCOPE_NAME + '(\'' + ptOrder + '\')"></span>' +
+				'</button>' );
+		}, function( scope, iElement, iAttrs ) {
+			if ( iAttrs.ptOrderInit )
+				scope.$initialOrderedProperty = iAttrs.ptOrder;
+		} )
+	};
+}
 
-		function postLink( scope ) {
-			compileElement( scope );
+function ptOrderInit() {
+	return {
+		restrict: 'A',
+		link: link
+	};
+
+	function link( scope, iElement, iAttrs ) {
+		switch ( iAttrs[ this.name ] ) {
+		case 'desc':
+			sort();
+		case 'asc':
+			sort();
 		}
-	};
-}
 
-function ptItem( compilerPostLink ) {
-	return {
-		restrict: 'A',
-		require: '^^ptList',
-		terminal: true,
-		priority: 1000,
-		compile: compile
-	};
-
-	function compile( tElement, tAttrs ) {
-		tAttrs.$set( 'ngRepeat', ( tElement.attr( getAttrName( tAttrs, 'ptItem' ) ) || '$item' ) + ' in $list' );
-		tElement.prepend( '<td class="text-right">{{getRowNumber($index) | number}}</td>' );
-
-		return compilerPostLink( 'ptItem', tElement, tAttrs );
+		function sort() {
+			scope[ SORT_SCOPE_NAME ]( scope.$initialOrderedProperty );
+		}
 	}
 }
 
-function ptOrder( compilerPostLink ) {
+function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
+	var manageAttrName = 'ptItemManage',
+		privyManageScopeName = '$manage';
+
 	return {
 		restrict: 'A',
-		require: '^^ptList',
 		terminal: true,
 		priority: 1000,
-		compile: compile
+		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
+			var itemScopeName = tAttrs.ptItem || '$item';
+
+			tAttrs.$set( 'ngRepeat', itemScopeName + ' in ' + LIST_SCOPE_NAME );
+			tElement.prepend( '<td class="text-right">{{' + GET_ROW_NUMBER_SCOPE_NAME + '($index) | number}}</td>' );
+
+			var customManageScopeName = tAttrs[ manageAttrName ];
+			if ( customManageScopeName )
+				tElement.append( '<td>' +
+					'<div class="btn-group" role="group" ng-hide="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$startEdition($index)" ng-if="' + customManageScopeName + '.edit"><span class="fas fa-edit"></span></button>' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$delete($index)" ng-if="' + customManageScopeName + '.delete"><span class="fas fa-trash"></span></button>' +
+					'</div>' +
+					'<div class="btn-group" role="group" ng-if="' + customManageScopeName + '.edit" ng-show="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$edit($index)"><span class="fas fa-check"></span></button>' +
+					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$cancelEdition($index)"><span class="fas fa-times"></span></button>' +
+					'</div>' +
+					'</td>' );
+		}, function( scope, iElement, iAttrs ) {
+			var itemManageOptions = scope.$eval( iAttrs[ manageAttrName ] );
+
+			if ( !itemManageOptions )
+				return;
+
+			scope[ privyManageScopeName ] = {
+				$startEdition: $startEdition,
+				$delete: $delete,
+				$edit: $edit,
+				$cancelEdition: $cancelEdition
+			};
+			scope.$isEditing = $isEditing;
+
+			function $startEdition( index ) {
+				var item = getItem( index );
+				item[ OLD_ITEM_SCOPE_NAME ] = angular.copy( item );
+				item[ EDITING_ITEM_SCOPE_NAME ] = true;
+			}
+
+			function $delete( index ) {
+				if ( confirmDeletion() ) {
+					var item = getItem( index );
+					executeAfterPromise( itemManageOptions.delete( item ), function() {
+						scope.$apply( function() {
+							scope[ TOTAL_LIST_SCOPE_NAME ].splice( item[ INDEX_SCOPE_NAME ], 1 );
+						} );
+					} );
+				}
+			}
+
+			function $edit( index ) {
+				var newItem = angular.copy( getItem( index ) ),
+					oldItem = newItem[ OLD_ITEM_SCOPE_NAME ];
+				delete newItem[ OLD_ITEM_SCOPE_NAME ];
+				delete newItem[ EDITING_ITEM_SCOPE_NAME ];
+				executeAfterPromise( itemManageOptions.edit( newItem, oldItem ), function() {
+					endEdition( index );
+				} );
+			}
+
+			function $cancelEdition( index ) {
+				var item = getItem( index );
+				angular.forEach( item, function( value, key ) {
+					if ( key == OLD_ITEM_SCOPE_NAME || key == EDITING_ITEM_SCOPE_NAME )
+						return;
+					var oldValue = item[ OLD_ITEM_SCOPE_NAME ][ key ];
+					if ( oldValue === undefined )
+						delete item[ key ];
+					else
+						item[ key ] = oldValue;
+				} );
+				endEdition( index );
+			}
+
+			function $isEditing( index ) {
+				return getItem( index )[ EDITING_ITEM_SCOPE_NAME ];
+			}
+
+			function getItem( index ) {
+				return scope[ LIST_SCOPE_NAME ][ index ];
+			}
+
+			function executeAfterPromise( promise, execute ) {
+				if ( promise )
+					promise.then( function() {
+						execute();
+					} );
+				else
+					execute();
+			}
+
+			function endEdition( index ) {
+				var item = getItem( index );
+				delete item[ OLD_ITEM_SCOPE_NAME ];
+				delete item[ EDITING_ITEM_SCOPE_NAME ];
+			}
+		} )
 	};
-
-	function compile( tElement, tAttrs ) {
-		var ptOrder = tAttrs.ptOrder;
-		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: isActive(\'' + ptOrder + '\')}" ng-click="sort(\'' + ptOrder + '\')">' +
-			'<span class="glyphicon" ng-class="getIconClass(\'' + ptOrder + '\')"></span>' +
-			'</button>' );
-
-		return compilerPostLink( 'ptOrder', tElement, tAttrs );
-	}
 }
 
-function getAttrName( attrs, name ) {
-	return attrs.$attr[ name ];
+function getPtItemManageDirectiveOptions( getAntiloopDirectiveCompileOption ) {
+	return function( isInput ) {
+		return {
+			restrict: 'A',
+			compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
+				tAttrs.$set( isInput ? 'ngShow' : 'ngHide', '$isEditing($index)' );
+			} )
+		};
+	};
+}
+
+function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions();
+}
+
+function ptItemManageInput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions( true );
 }
 } )();
