@@ -1,3 +1,3 @@
 ( function() {
-angular.module( 'proaTools.records', [ 'ngAria', 'ui.bootstrap' ] );
+angular.module( 'proaTools.records', [ 'ui.bootstrap' ] );
 } )();
