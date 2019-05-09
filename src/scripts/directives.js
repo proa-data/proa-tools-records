@@ -87,7 +87,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		}
 
 		function exportToXls() {
-			XLSX.writeFile( XLSX.utils.table_to_book( $scope[ EXPORTING_TABLE_SCOPE_NAME ] ), ( $attrs.ptFilename || 'Excel' ) + '.xlsx' );
+			XLSX.writeFile( XLSX.utils.table_to_book( $scope[ EXPORTING_TABLE_SCOPE_NAME ], { raw: true } ), ( $attrs.ptFilename || 'Excel' ) + '.xlsx' );
 		}
 
 		function sort( property ) {
