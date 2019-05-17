@@ -5,16 +5,16 @@ angular
 	.factory( 'confirmDeletion', confirmDeletion );
 
 function getAntiloopDirectiveCompileOption( $compile ) {
-	return function( domTransformation, scopeLinking ) {
+	return function( compile, previousPreLink ) {
 		return function( tElement, tAttrs ) {
-			domTransformation( tElement, tAttrs );
+			compile( tElement, tAttrs );
 			return {
 				pre: preLink
 			};
 
 			function preLink( scope, iElement, iAttrs ) {
-				if ( scopeLinking )
-					scopeLinking( scope, iElement, iAttrs );
+				if ( previousPreLink )
+					previousPreLink( scope, iElement, iAttrs );
 
 				iElement.removeAttr( iAttrs.$attr[ this.name ] );
 				$compile( iElement )( scope );

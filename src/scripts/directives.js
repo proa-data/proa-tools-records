@@ -123,7 +123,9 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 	}
 
 	function compile() {
-		return function( scope, iElement ) {
+		return postLink;
+
+		function postLink( scope, iElement ) {
 			var totalCols = 0;
 			iElement
 				.find( 'thead > tr:first' )
@@ -156,7 +158,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 			function compileHtml( html ) {
 				return $compile( html )( scope );
 			}
-		};
+		}
 	}
 }
 
@@ -187,16 +189,20 @@ function ptOrder( getAntiloopDirectiveCompileOption ) {
 		restrict: 'A',
 		terminal: true,
 		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
-			var ptOrder = tAttrs.ptOrder;
-			tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(\'' + ptOrder + '\')}" ng-click="' + SN.SORT + '(\'' + ptOrder + '\')">' +
-				'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(\'' + ptOrder + '\')"></span>' +
-				'</button>' );
-		}, function( scope, iElement, iAttrs ) {
-			if ( iAttrs.ptOrderInit )
-				scope[ SN.INITIAL_ORDERED_PROPERTY ] = iAttrs.ptOrder;
-		} )
+		compile: getAntiloopDirectiveCompileOption( compile, preLink )
 	};
+
+	function compile( tElement, tAttrs ) {
+		var ptOrder = tAttrs.ptOrder;
+		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(\'' + ptOrder + '\')}" ng-click="' + SN.SORT + '(\'' + ptOrder + '\')">' +
+			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(\'' + ptOrder + '\')"></span>' +
+			'</button>' );
+	}
+
+	function preLink( scope, iElement, iAttrs ) {
+		if ( iAttrs.ptOrderInit )
+			scope[ SN.INITIAL_ORDERED_PROPERTY ] = iAttrs.ptOrder;
+	}
 }
 
 function ptOrderInit() {
@@ -236,104 +242,110 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 		restrict: 'A',
 		terminal: true,
 		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
-			tAttrs.$set( 'ngRepeat', ( tAttrs.ptItem || '$item' ) + ' in ' + SN.LIST );
-			tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
-
-			var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
-			if ( customManageSn )
-				tElement.append( '<td>' +
-					'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '($index)">' +
-					'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '($index)" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
-					'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '($index)" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
-					'</div>' +
-					'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '($index)">' +
-					'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '($index)"><span class="fas fa-check"></span></button>' +
-					'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '($index)"><span class="fas fa-times"></span></button>' +
-					'</div>' +
-					'</td>' );
-		}, function( scope, iElement, iAttrs ) {
-			var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
-
-			if ( !itemManageOptions )
-				return;
-
-			scope[ OSN.START_EDITION ] = startEdition;
-			scope[ OSN.DELETE ] = deleteItem;
-			scope[ OSN.EDIT ] = edit;
-			scope[ OSN.CANCEL_EDITION ] = cancelEdition;
-			scope[ SN.IS_EDITING ] = isEditing;
-
-			function startEdition( index ) {
-				var item = getItem( index );
-				item[ IPN.OLD ] = angular.copy( item );
-				item[ IPN.IS_EDITING ] = true;
-			}
-
-			function deleteItem( index ) {
-				if ( confirmDeletion() ) {
-					var item = getItem( index );
-					executeAfterPromise( itemManageOptions.delete( item ), function() {
-						scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
-					} );
-				}
-			}
-
-			function edit( index ) {
-				var item = getItem( index );
-				executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
-					endEdition( index );
-				} );
-			}
-
-			function cancelEdition( index ) {
-				var item = getItem( index );
-				angular.forEach( item, function( value, key ) {
-					if ( key == IPN.OLD || key == IPN.IS_EDITING )
-						return;
-					var oldValue = item[ IPN.OLD ][ key ];
-					if ( oldValue === undefined )
-						delete item[ key ];
-					else
-						item[ key ] = oldValue;
-				} );
-				endEdition( index );
-			}
-
-			function isEditing( index ) {
-				return getItem( index )[ IPN.IS_EDITING ];
-			}
-
-			function getItem( index ) {
-				return scope[ SN.LIST ][ index ];
-			}
-
-			function executeAfterPromise( promise, execute ) {
-				if ( promise && promise.then )
-					promise.then( function() {
-						execute();
-					} );
-				else
-					execute();
-			}
-
-			function endEdition( index ) {
-				var item = getItem( index );
-				delete item[ IPN.OLD ];
-				delete item[ IPN.IS_EDITING ];
-			}
-		} )
+		compile: getAntiloopDirectiveCompileOption( compile, preLink )
 	};
+
+	function compile( tElement, tAttrs ) {
+		tAttrs.$set( 'ngRepeat', ( tAttrs.ptItem || '$item' ) + ' in ' + SN.LIST );
+		tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
+
+		var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
+		if ( customManageSn )
+			tElement.append( '<td>' +
+				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '($index)">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '($index)" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '($index)" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
+				'</div>' +
+				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '($index)">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '($index)"><span class="fas fa-check"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '($index)"><span class="fas fa-times"></span></button>' +
+				'</div>' +
+				'</td>' );
+	}
+
+	function preLink( scope, iElement, iAttrs ) {
+		var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
+
+		if ( !itemManageOptions )
+			return;
+
+		scope[ OSN.START_EDITION ] = startEdition;
+		scope[ OSN.DELETE ] = deleteItem;
+		scope[ OSN.EDIT ] = edit;
+		scope[ OSN.CANCEL_EDITION ] = cancelEdition;
+		scope[ SN.IS_EDITING ] = isEditing;
+
+		function startEdition( index ) {
+			var item = getItem( index );
+			item[ IPN.OLD ] = angular.copy( item );
+			item[ IPN.IS_EDITING ] = true;
+		}
+
+		function deleteItem( index ) {
+			if ( confirmDeletion() ) {
+				var item = getItem( index );
+				executeAfterPromise( itemManageOptions.delete( item ), function() {
+					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
+				} );
+			}
+		}
+
+		function edit( index ) {
+			var item = getItem( index );
+			executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
+				endEdition( index );
+			} );
+		}
+
+		function cancelEdition( index ) {
+			var item = getItem( index );
+			angular.forEach( item, function( value, key ) {
+				if ( key == IPN.OLD || key == IPN.IS_EDITING )
+					return;
+				var oldValue = item[ IPN.OLD ][ key ];
+				if ( oldValue === undefined )
+					delete item[ key ];
+				else
+					item[ key ] = oldValue;
+			} );
+			endEdition( index );
+		}
+
+		function isEditing( index ) {
+			return getItem( index )[ IPN.IS_EDITING ];
+		}
+
+		function getItem( index ) {
+			return scope[ SN.LIST ][ index ];
+		}
+
+		function executeAfterPromise( promise, execute ) {
+			if ( promise && promise.then )
+				promise.then( function() {
+					execute();
+				} );
+			else
+				execute();
+		}
+
+		function endEdition( index ) {
+			var item = getItem( index );
+			delete item[ IPN.OLD ];
+			delete item[ IPN.IS_EDITING ];
+		}
+	}
 }
 
 function getPtItemManageDirectiveOptions( getAntiloopDirectiveCompileOption ) {
 	return function( isInput ) {
 		return {
 			restrict: 'A',
-			compile: getAntiloopDirectiveCompileOption( function( tElement, tAttrs ) {
-				tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '($index)' );
-			} )
+			compile: getAntiloopDirectiveCompileOption( compile )
 		};
+
+		function compile( tElement, tAttrs ) {
+			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '($index)' );
+		}
 	};
 }
 
