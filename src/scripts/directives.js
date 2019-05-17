@@ -140,7 +140,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				iElement = parentEl;
 			iElement.before( compileHtml( '<div class="clearfix" ng-show="' + TOTAL_LIST_SCOPE_NAME + '.length">' +
 				'<ul uib-pagination total-items="' + TOTAL_LIST_SCOPE_NAME + '.length" ng-model="' + CURRENT_PAGE_SCOPE_NAME + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + ENABLED_PAGINATION_SCOPE_NAME + '"></ul>' +
-				'<div class="btn-group pull-right" role="group">' +
+				'<div class="btn-group pull-right" role="toolbar">' +
 				'<button type="button" class="btn btn-default" ng-click="' + TOGGLE_PAGINATION_SCOPE_NAME + '()">' +
 				'<span class="fa-stack fa-stack-pt-records" ng-if="' + ENABLED_PAGINATION_SCOPE_NAME + '"><span class="far fa-file fa-stack-1x"></span><span class="fas fa-slash fa-stack-1x"></span></span>' +
 				'<span class="far fa-file" ng-if="!' + ENABLED_PAGINATION_SCOPE_NAME + '"></span>' +
@@ -232,11 +232,11 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			var customManageScopeName = tAttrs[ manageAttrName ];
 			if ( customManageScopeName )
 				tElement.append( '<td>' +
-					'<div class="btn-group" role="group" ng-hide="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
+					'<div class="btn-group" role="toolbar" ng-hide="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
 					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$startEdition($index)" ng-if="' + customManageScopeName + '.edit"><span class="fas fa-edit"></span></button>' +
 					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$delete($index)" ng-if="' + customManageScopeName + '.delete"><span class="fas fa-trash"></span></button>' +
 					'</div>' +
-					'<div class="btn-group" role="group" ng-if="' + customManageScopeName + '.edit" ng-show="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
+					'<div class="btn-group" role="toolbar" ng-if="' + customManageScopeName + '.edit" ng-show="' + itemScopeName + '.' + EDITING_ITEM_SCOPE_NAME + '">' +
 					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$edit($index)"><span class="fas fa-check"></span></button>' +
 					'<button type="button" class="btn btn-default" ng-click="' + privyManageScopeName + '.$cancelEdition($index)"><span class="fas fa-times"></span></button>' +
 					'</div>' +
