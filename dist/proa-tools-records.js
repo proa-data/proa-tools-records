@@ -309,11 +309,8 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			}
 
 			function edit( index ) {
-				var newItem = getItem( index ),
-					oldItem = newItem[ IPN.OLD ];
-				delete newItem[ IPN.OLD ];
-				delete newItem[ IPN.IS_EDITING ];
-				executeAfterPromise( itemManageOptions.edit( newItem, oldItem ), function() {
+				var item = getItem( index );
+				executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
 					endEdition( index );
 				} );
 			}
