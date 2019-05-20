@@ -184,13 +184,8 @@ function paginationNext( getPaginationDirectiveOptions ) {
 	return getPaginationDirectiveOptions( true );
 }
 
-function ptOrder( getAntiloopDirectiveCompileOption ) {
-	return {
-		restrict: 'A',
-		terminal: true,
-		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( compile, preLink )
-	};
+function ptOrder( getCompiledDirectiveOptions ) {
+	return getCompiledDirectiveOptions( compile, postLink );
 
 	function compile( tElement, tAttrs ) {
 		var ptOrder = tAttrs.ptOrder;
@@ -199,7 +194,7 @@ function ptOrder( getAntiloopDirectiveCompileOption ) {
 			'</button>' );
 	}
 
-	function preLink( scope, iElement, iAttrs ) {
+	function postLink( scope, iElement, iAttrs ) {
 		if ( iAttrs.ptOrderInit )
 			scope[ SN.INITIAL_ORDERED_PROPERTY ] = iAttrs.ptOrder;
 	}
@@ -225,7 +220,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
+function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -238,12 +233,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return {
-		restrict: 'A',
-		terminal: true,
-		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( compile, preLink )
-	};
+	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
 
 	function compile( tElement, tAttrs ) {
 		tAttrs.$set( 'ngRepeat', ( tAttrs.ptItem || '$item' ) + ' in ' + SN.LIST );
@@ -263,7 +253,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 				'</td>' );
 	}
 
-	function preLink( scope, iElement, iAttrs ) {
+	function postLink( scope, iElement, iAttrs ) {
 		var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
 
 		if ( !itemManageOptions )
@@ -336,12 +326,9 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 	}
 }
 
-function getPtItemManageDirectiveOptions( getAntiloopDirectiveCompileOption ) {
+function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 	return function( isInput ) {
-		return {
-			restrict: 'A',
-			compile: getAntiloopDirectiveCompileOption( compile )
-		};
+		return getCompiledDirectiveOptions( compile );
 
 		function compile( tElement, tAttrs ) {
 			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '($index)' );

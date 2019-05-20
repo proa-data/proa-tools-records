@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.5.5 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.5.6 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -213,13 +213,8 @@ function paginationNext( getPaginationDirectiveOptions ) {
 	return getPaginationDirectiveOptions( true );
 }
 
-function ptOrder( getAntiloopDirectiveCompileOption ) {
-	return {
-		restrict: 'A',
-		terminal: true,
-		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( compile, preLink )
-	};
+function ptOrder( getCompiledDirectiveOptions ) {
+	return getCompiledDirectiveOptions( compile, postLink );
 
 	function compile( tElement, tAttrs ) {
 		var ptOrder = tAttrs.ptOrder;
@@ -228,7 +223,7 @@ function ptOrder( getAntiloopDirectiveCompileOption ) {
 			'</button>' );
 	}
 
-	function preLink( scope, iElement, iAttrs ) {
+	function postLink( scope, iElement, iAttrs ) {
 		if ( iAttrs.ptOrderInit )
 			scope[ SN.INITIAL_ORDERED_PROPERTY ] = iAttrs.ptOrder;
 	}
@@ -254,7 +249,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
+function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -267,12 +262,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return {
-		restrict: 'A',
-		terminal: true,
-		priority: 1000,
-		compile: getAntiloopDirectiveCompileOption( compile, preLink )
-	};
+	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
 
 	function compile( tElement, tAttrs ) {
 		tAttrs.$set( 'ngRepeat', ( tAttrs.ptItem || '$item' ) + ' in ' + SN.LIST );
@@ -292,7 +282,7 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 				'</td>' );
 	}
 
-	function preLink( scope, iElement, iAttrs ) {
+	function postLink( scope, iElement, iAttrs ) {
 		var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
 
 		if ( !itemManageOptions )
@@ -365,12 +355,9 @@ function ptItem( getAntiloopDirectiveCompileOption, confirmDeletion ) {
 	}
 }
 
-function getPtItemManageDirectiveOptions( getAntiloopDirectiveCompileOption ) {
+function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 	return function( isInput ) {
-		return {
-			restrict: 'A',
-			compile: getAntiloopDirectiveCompileOption( compile )
-		};
+		return getCompiledDirectiveOptions( compile );
 
 		function compile( tElement, tAttrs ) {
 			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '($index)' );
@@ -389,20 +376,25 @@ function ptItemManageInput( getPtItemManageDirectiveOptions ) {
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getAntiloopDirectiveCompileOption', getAntiloopDirectiveCompileOption )
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
 	.factory( 'confirmDeletion', confirmDeletion );
 
-function getAntiloopDirectiveCompileOption( $compile ) {
-	return function( compile, previousPreLink ) {
-		return function( tElement, tAttrs ) {
-			compile( tElement, tAttrs );
-			return {
-				pre: preLink
-			};
+function getCompiledDirectiveOptions( $compile ) {
+	return function( compileContent, previousPostLink ) {
+		return {
+			restrict: 'A',
+			priority: 1000,
+			terminal: true,
+			compile: compile
+		};
 
-			function preLink( scope, iElement, iAttrs ) {
-				if ( previousPreLink )
-					previousPreLink( scope, iElement, iAttrs );
+		function compile( tElement, tAttrs ) {
+			compileContent( tElement, tAttrs );
+			return postLink;
+
+			function postLink( scope, iElement, iAttrs ) {
+				if ( previousPostLink )
+					previousPostLink( scope, iElement, iAttrs );
 
 				iElement.removeAttr( iAttrs.$attr[ this.name ] );
 				$compile( iElement )( scope );

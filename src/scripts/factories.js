@@ -1,20 +1,25 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getAntiloopDirectiveCompileOption', getAntiloopDirectiveCompileOption )
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
 	.factory( 'confirmDeletion', confirmDeletion );
 
-function getAntiloopDirectiveCompileOption( $compile ) {
-	return function( compile, previousPreLink ) {
-		return function( tElement, tAttrs ) {
-			compile( tElement, tAttrs );
-			return {
-				pre: preLink
-			};
+function getCompiledDirectiveOptions( $compile ) {
+	return function( compileContent, previousPostLink ) {
+		return {
+			restrict: 'A',
+			priority: 1000,
+			terminal: true,
+			compile: compile
+		};
 
-			function preLink( scope, iElement, iAttrs ) {
-				if ( previousPreLink )
-					previousPreLink( scope, iElement, iAttrs );
+		function compile( tElement, tAttrs ) {
+			compileContent( tElement, tAttrs );
+			return postLink;
+
+			function postLink( scope, iElement, iAttrs ) {
+				if ( previousPostLink )
+					previousPostLink( scope, iElement, iAttrs );
 
 				iElement.removeAttr( iAttrs.$attr[ this.name ] );
 				$compile( iElement )( scope );
