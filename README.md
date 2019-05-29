@@ -56,8 +56,8 @@ An object (property on scope) is passed here. It must to be formed by one or two
 
 #### `ptItemManageOutput`
 
-Put on HTML element (usually an interpolated `span`) that have to be hidden in editing mode.
+Place on HTML elements (usually interpolated `span`s) that have to be hidden in editing mode.
 
 #### `ptItemManageInput`
 
-The opposite: form controls (`input`, `select`, `textarea`...) is shown when the edition.
+The opposite: Form controls (`input`, `select`, `textarea`...) are displayed when editing.
