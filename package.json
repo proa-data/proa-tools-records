@@ -24,7 +24,9 @@
   },
   "homepage": "https://github.com/proa-data/proa-tools-records",
   "devDependencies": {
+    "axios": "^0.19.0",
     "browser-sync": "^2.26.3",
+    "event-stream": "3.3.4",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
@@ -40,7 +42,7 @@
     "gulp-uglify": "^3.0.1",
     "gulp-useref": "^3.1.6",
     "gulp-wiredep": "^1.2.0",
-    "main-bower-files": "^2.13.1",
-    "event-stream": "3.3.4"
+    "js-yaml": "~>3.13.1",
+    "main-bower-files": "^2.13.1"
   }
 }
