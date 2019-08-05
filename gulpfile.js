@@ -46,7 +46,7 @@ function delFolder(path) {
 }
 
 function processCss(extraProcess) {
-	return processStream(extraProcess, gulp.src(paths.src+'styles/index.less').pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
+	return processStream(extraProcess, gulp.src(paths.src+'less/index.less').pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
 }
 
 function renameMin() {
@@ -55,7 +55,7 @@ function renameMin() {
 
 function processJs(extraProcess) {
 	const firstJsFile = 'module.js';
-	return processStream(extraProcess, gulp.src(paths.src+'scripts/*.js').pipe($.order([firstJsFile,'!'+firstJsFile])).pipe($.concat(baseName+'.js')).pipe(addSpecialComment()));
+	return processStream(extraProcess, gulp.src(paths.src+'js/*').pipe($.order([firstJsFile,'!'+firstJsFile])).pipe($.concat(baseName+'.js')).pipe(addSpecialComment()));
 }
 
 function processStream(process, stream) {
