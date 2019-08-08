@@ -129,7 +129,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 			var totalCols = 0;
 			iElement
 				.find( 'thead > tr:first' )
-					.prepend( compileHtml( '<th>' + PT_RECORDS_TEXTS.number + '</th>' ) )
+					.prepend( compileHtml( '<th rowspan="' + iElement.find( 'thead > tr' ).length + '">' + PT_RECORDS_TEXTS.number + '</th>' ) )
 					.find( 'th' )
 						.each( function() {
 							totalCols += angular.element( this ).prop( 'colspan' );

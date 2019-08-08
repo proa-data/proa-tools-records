@@ -36,7 +36,7 @@ function DemoController( $http ) {
 					min: -FLOATING_MAX,
 					max: FLOATING_MAX
 				} ),
-				date: chance.date(),
+				datetime: chance.date(),
 				boolean: chance.bool()
 			} );
 		}
