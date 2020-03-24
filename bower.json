@@ -25,15 +25,15 @@
     "demo/"
   ],
   "dependencies": {
-    "jquery": "^3",
-    "angular": "^1",
-    "angular-bootstrap": "^2",
-    "bootstrap": "^3",
-    "js-xlsx": "^0",
-    "font-awesome": "^5"
+    "jquery": "^3.4.1",
+    "angular": "^1.7.9",
+    "angular-bootstrap": "^2.5.0",
+    "bootstrap": "^3.4.1",
+    "js-xlsx": "^0.15.5",
+    "font-awesome": "^5.13.0"
   },
   "devDependencies": {
-    "chance": "^1"
+    "chance": "^1.1.4"
   },
   "overrides": {
     "angular": {
