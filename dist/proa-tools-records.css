@@ -16,3 +16,12 @@
   vertical-align: sub;
   width: 1em;
 }
+.table-sticky {
+  position: relative;
+  max-height: 50vh;
+}
+.table-sticky .table > thead > tr > th {
+  position: sticky;
+  top: 0;
+  background-color: green;
+}

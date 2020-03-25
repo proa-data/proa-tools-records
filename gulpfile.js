@@ -3,6 +3,7 @@ const pckg = require('./package.json'),
 	$ = require('gulp-load-plugins')(),
 	mainBowerFiles = require('main-bower-files'),
 	gulpSync = $.sync(gulp),
+	injStr = $.injectString,
 	browserSync = require('browser-sync').create();
 
 const baseName = pckg.name,
@@ -14,6 +15,8 @@ const paths = {
 	demo: 'demo/',
 	tmp: '.tmp/'
 };
+
+const nl = '\n';
 
 gulp.task('del:dist', () => delFolder(paths.dist));
 gulp.task('styles:copy', () => processCss());
@@ -30,7 +33,7 @@ gulp.task('build', gulpSync.sync([
 ]));
 
 gulp.task('del:tmp', () => delFolder(paths.tmp));
-gulp.task('index', ['build'], () => gulp.src(paths.demo+'index.html').pipe($.wiredep({devDependencies: true})).pipe($.useref()).pipe($.injectString.replace('{{PACKAGE_NAME}}', packageName)).pipe(gulp.dest(paths.tmp)));
+gulp.task('index', ['build'], () => gulp.src(paths.demo+'index.html').pipe($.wiredep({devDependencies: true})).pipe($.useref()).pipe(injStr.replace('{{PACKAGE_NAME}}', packageName)).pipe(gulp.dest(paths.tmp)));
 gulp.task('fonts', () => gulp.src(mainBowerFiles()).pipe($.filter('**/*.{eot,otf,svg,ttf,woff,woff2}')).pipe(gulp.dest(paths.tmp+'fonts/')));
 
 gulp.task('demo', gulpSync.sync([
@@ -46,7 +49,7 @@ function delFolder(path) {
 }
 
 function processCss(extraProcess) {
-	return processStream(extraProcess, gulp.src(paths.src+'less/index.less').pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
+	return processStream(extraProcess, gulp.src(paths.src+'less/index.less').pipe(injStr.prepend('// bower:less'+nl+'// endbower'+nl)).pipe($.wiredep()).pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
 }
 
 function renameMin() {
@@ -63,6 +66,5 @@ function processStream(process, stream) {
 }
 
 function addSpecialComment() {
-	const nl = '\n';
-	return $.injectString.prepend('/*!'+nl+' * '+packageName+' v'+pckg.version+' ('+pckg.homepage+')'+nl+' */'+nl+nl);
+	return injStr.prepend('/*!'+nl+' * '+packageName+' v'+pckg.version+' ('+pckg.homepage+')'+nl+' */'+nl+nl);
 }

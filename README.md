@@ -61,3 +61,11 @@ Place on HTML elements (usually interpolated `span`s) that have to be hidden in 
 #### `ptItemManageInput`
 
 The opposite: Form controls (`input`, `select`, `textarea`...) are displayed when editing.
+
+### Sticky tables
+
+You can make the head of the table always visible. In order to this, only one CSS class name is needed:
+
+#### `table-sticky`
+
+Place in the `table-responsive` table containers.
