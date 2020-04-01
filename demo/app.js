@@ -11,6 +11,7 @@ function DemoController( $http ) {
 		delete: deleteItem
 	};
 	vm.xlsFilename = 'Example file';
+	vm.getTotalAmount = getTotalAmount;
 	vm.load = load;
 	vm.empty = empty;
 
@@ -23,6 +24,14 @@ function DemoController( $http ) {
 		return $http.get( './' ).then( function() {
 			console.info( 'Item (with string "' + item.string + '") has been deleted.' );
 		} );
+	}
+
+	function getTotalAmount() {
+		var n = 0;
+		angular.forEach( vm.list, function( item ) {
+			n += item.number;
+		} );
+		return n;
 	}
 
 	function load() {
