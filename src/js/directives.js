@@ -10,7 +10,8 @@ angular
 	.directive( 'ptItem', ptItem )
 	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
-	.directive( 'ptItemManageInput', ptItemManageInput );
+	.directive( 'ptItemManageInput', ptItemManageInput )
+	.directive( 'tableSticky', tableSticky );
 
 var SN = { // Scope names
 		LIST: '$list',
@@ -342,5 +343,32 @@ function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
 
 function ptItemManageInput( getPtItemManageDirectiveOptions ) {
 	return getPtItemManageDirectiveOptions( true );
+}
+
+function tableSticky() {
+	return {
+		restrict: 'C',
+		link: link
+	};
+
+	function link( scope, iElement ) {
+		var parentElem = iElement.find( '.table' );
+
+		setPosition( 'thead', 'last-child', 'top', getTopPosition );
+		setPosition( 'tfoot', 'first-child', 'bottom', function( elem ) {
+			return getTopPosition( elem ) + elem.outerHeight();
+		} );
+
+		function setPosition( tagName, pseudoClass, prop, getterFn ) {
+			var childElem = parentElem.find( tagName + ' > tr:' + pseudoClass ),
+				childValue = getterFn( childElem ),
+				parentValue = getterFn( parentElem );
+			childElem.children( 'th, td' ).css( prop, Math.abs( childValue - parentValue ) );
+		}
+
+		function getTopPosition( elem ) {
+			return elem.position().top;
+		}
+	}
 }
 } )();
