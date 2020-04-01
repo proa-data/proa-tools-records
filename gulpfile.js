@@ -34,11 +34,12 @@ gulp.task('build', gulpSync.sync([
 
 gulp.task('del:tmp', () => delFolder(paths.tmp));
 gulp.task('index', ['build'], () => gulp.src(paths.demo+'index.html').pipe($.wiredep({devDependencies: true})).pipe($.useref()).pipe(injStr.replace('{{PACKAGE_NAME}}', packageName)).pipe(gulp.dest(paths.tmp)));
+gulp.task('styles:tmp', () => gulp.src(paths.src+'less/index.less').pipe(injStr.prepend('// bower:less'+nl+'// endbower'+nl)).pipe($.wiredep()).pipe($.less()).pipe($.rename({basename: baseName})).pipe(gulp.dest(paths.tmp+'styles/')));
 gulp.task('fonts', () => gulp.src(mainBowerFiles()).pipe($.filter('**/*.{eot,otf,svg,ttf,woff,woff2}')).pipe(gulp.dest(paths.tmp+'fonts/')));
 
 gulp.task('demo', gulpSync.sync([
 	'del:tmp',
-	['index', 'fonts']
+	['index', 'styles:tmp', 'fonts']
 ]), () => browserSync.init({server: {baseDir: paths.tmp}}));
 
 gulp.task('default', ['build']);
@@ -49,7 +50,7 @@ function delFolder(path) {
 }
 
 function processCss(extraProcess) {
-	return processStream(extraProcess, gulp.src(paths.src+'less/index.less').pipe(injStr.prepend('// bower:less'+nl+'// endbower'+nl)).pipe($.wiredep()).pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
+	return processStream(extraProcess, gulp.src(paths.src+'css/index.less').pipe($.less()).pipe(addSpecialComment()).pipe($.rename({basename: baseName})));
 }
 
 function renameMin() {

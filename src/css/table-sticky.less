@@ -1,0 +1,27 @@
+.table-sticky {
+	position: relative;
+	max-height: 50vh;
+	.table {
+		> thead,
+		> tfoot {
+			> tr {
+				> th,
+				> td {
+					position: sticky;
+				}
+			}
+		}
+		> thead > tr {
+			> th,
+			> td {
+				top: 0;
+			}
+		}
+		> tfoot > tr {
+			> th,
+			> td {
+				bottom: 0;
+			}
+		}
+	}
+}
