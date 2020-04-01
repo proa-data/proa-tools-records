@@ -53,6 +53,13 @@
 							</td>
 						</tr>
 					</tbody>
+					<tfoot>
+						<tr>
+							<th class="invisible"></th>
+							<td class="invisible"></td>
+							<td>{{vm.getTotalAmount() | number}}</td>
+						</tr>
+					</tfoot>
 				</table>
 			</div>
 			<button type="button" class="btn btn-primary" ng-click="vm.load()">Load</button>

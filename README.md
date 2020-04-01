@@ -64,7 +64,7 @@ The opposite: Form controls (`input`, `select`, `textarea`...) are displayed whe
 
 ### Sticky tables
 
-You can make the head of the table always visible. In order to this, only one CSS class name is needed:
+You can make the table cells of head and foot always visible. In order to this, only one CSS class name is needed:
 
 #### `table-sticky`
 

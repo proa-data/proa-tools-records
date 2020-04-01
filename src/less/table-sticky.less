@@ -1,12 +1,31 @@
 .table-sticky {
 	position: relative;
 	max-height: 50vh;
-	.table > thead > tr > th {
-		position: sticky;
-		top: 0;
-		background-color: @table-bg;
-		& when (@table-bg = transparent) {
-			background-color: @body-bg;
+	.table {
+		> thead,
+		> tfoot {
+			> tr {
+				> th,
+				> td {
+					position: sticky;
+					background-color: @table-bg;
+					& when (@table-bg = transparent) {
+						background-color: @body-bg;
+					}
+				}
+			}
+		}
+		> thead > tr {
+			> th,
+			> td {
+				top: 0;
+			}
+		}
+		> tfoot > tr {
+			> th,
+			> td {
+				bottom: 0;
+			}
 		}
 	}
 }
