@@ -381,22 +381,28 @@ function tableSticky() {
 	};
 
 	function link( scope, iElement ) {
-		var parentElem = iElement.children( '.table' );
+		var parentElem = iElement.children( '.table' ),
+			captionHeight = parentElem.find( 'caption' ).outerHeight() || 0;
 
 		setPosition( 'caption + thead, colgroup + thead, thead:first-child', ':first-child', 'top', getTopPosition );
-		setPosition( 'tfoot', ':last-child', 'bottom', function( elem ) {
-			return getTopPosition( elem ) + elem.outerHeight();
+		setPosition( 'tfoot', ':last-child', 'bottom', function( elem, isParent ) {
+			return getTopPosition( elem, isParent ) + elem.outerHeight();
 		} );
 
 		function setPosition( filterSelector, notSelector, prop, getterFn ) {
-			var childElem = parentElem.children().filter( filterSelector ).children( 'tr:not(' + notSelector + ')' ),
-				childValue = getterFn( childElem ),
-				parentValue = getterFn( parentElem );
-			childElem.children( 'th, td' ).css( prop, Math.abs( childValue - parentValue ) );
+			var parentValue = getterFn( parentElem, true );
+			parentElem
+				.children()
+					.filter( filterSelector )
+						.children( 'tr:not(' + notSelector + ')' )
+							.each( function() {
+								var elem = $( this );
+								elem.children( 'th, td' ).css( prop, Math.abs( getterFn( elem ) - parentValue ) );
+							} );
 		}
 
-		function getTopPosition( elem ) {
-			return elem.position().top;
+		function getTopPosition( elem, isParent ) {
+			return elem.position().top + ( isParent ? captionHeight : 0 );
 		}
 	}
 }
