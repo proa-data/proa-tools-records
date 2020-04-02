@@ -1,8 +1,10 @@
 .table-sticky {
 	position: relative;
 	max-height: 50vh;
-	.table {
-		> thead,
+	> .table {
+		> caption + thead,
+		> colgroup + thead,
+		> thead:first-child,
 		> tfoot {
 			> tr {
 				> th,
@@ -11,10 +13,14 @@
 				}
 			}
 		}
-		> thead > tr {
-			> th,
-			> td {
-				top: 0;
+		> caption + thead,
+		> colgroup + thead,
+		> thead:first-child {
+			> tr {
+				> th,
+				> td {
+					top: 0;
+				}
 			}
 		}
 		> tfoot > tr {

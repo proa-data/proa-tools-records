@@ -352,15 +352,15 @@ function tableSticky() {
 	};
 
 	function link( scope, iElement ) {
-		var parentElem = iElement.find( '.table' );
+		var parentElem = iElement.children( '.table' );
 
-		setPosition( 'thead', 'last-child', 'top', getTopPosition );
-		setPosition( 'tfoot', 'first-child', 'bottom', function( elem ) {
+		setPosition( 'caption + thead, colgroup + thead, thead:first-child', ':first-child', 'top', getTopPosition );
+		setPosition( 'tfoot', ':last-child', 'bottom', function( elem ) {
 			return getTopPosition( elem ) + elem.outerHeight();
 		} );
 
-		function setPosition( tagName, pseudoClass, prop, getterFn ) {
-			var childElem = parentElem.find( tagName + ' > tr:' + pseudoClass ),
+		function setPosition( filterSelector, notSelector, prop, getterFn ) {
+			var childElem = parentElem.children().filter( filterSelector ).children( 'tr:not(' + notSelector + ')' ),
 				childValue = getterFn( childElem ),
 				parentValue = getterFn( parentElem );
 			childElem.children( 'th, td' ).css( prop, Math.abs( childValue - parentValue ) );
