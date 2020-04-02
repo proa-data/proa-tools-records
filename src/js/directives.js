@@ -127,25 +127,21 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		return postLink;
 
 		function postLink( scope, iElement ) {
-			var totalCols = 0;
 			iElement
-				.find( 'thead > tr:first' )
-					.prepend( compileHtml( '<th rowspan="' + iElement.find( 'thead > tr' ).length + '">' + PT_RECORDS_TEXTS.number + '</th>' ) )
-					.find( 'th' )
-						.each( function() {
-							totalCols += angular.element( this ).prop( 'colspan' );
-						} )
-					.end()
-				.end()
 				.find( 'tbody' )
-					.append( compileHtml( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' + totalCols + '">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
+					.append( compileElem( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
+						Math.max(
+							addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
+							addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
+						) +
+						'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
 
 			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
 
 			var parentEl = iElement.parent();
 			if ( parentEl.hasClass( 'table-responsive' ) )
 				iElement = parentEl;
-			iElement.before( compileHtml( '<div class="clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
+			iElement.before( compileElem( '<div class="clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
 				'<div class="btn-group pull-right" role="toolbar">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.TOGGLE_PAGINATION + '()">' +
@@ -156,8 +152,20 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'</div>' +
 				'</div>' ) );
 
-			function compileHtml( html ) {
-				return $compile( html )( scope );
+			function compileElem( elemOrHtml ) {
+				return $compile( elemOrHtml )( scope );
+			}
+
+			function addCellAndGetTotalCols( tagName, htmlContent ) {
+				var totalCols = 0;
+				iElement
+					.find( tagName + ' > tr:first' )
+						.prepend( compileElem( $( htmlContent ).prop( 'rowspan', iElement.find( tagName + ' > tr' ).length ).get( 0 ) ) )
+						.find( 'th, td' )
+							.each( function() {
+								totalCols += angular.element( this ).prop( 'colspan' );
+							} );
+				return totalCols;
 			}
 		}
 	}
