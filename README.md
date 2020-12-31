@@ -4,7 +4,7 @@ Control (pagination, ordering, data exporting and management) of records within 
 
 ## Installation
 
-```powershell
+```bash
 bower install proa-tools-records
 ```
 
