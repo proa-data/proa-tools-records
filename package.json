@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/proa-data/proa-tools-records",
   "devDependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "browser-sync": "^2.26.7",
     "event-stream": "3.3.4",
     "gulp": "^3.9.1",
