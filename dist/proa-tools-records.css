@@ -17,7 +17,9 @@
 }
 .table-sticky {
   position: relative;
-  max-height: 50vh;
+}
+.table-sticky.table-responsive {
+  overflow-x: visible;
 }
 .table-sticky > .table > caption + thead > tr > th,
 .table-sticky > .table > colgroup + thead > tr > th,
