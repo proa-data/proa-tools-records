@@ -50,7 +50,8 @@ var SN = { // Scope names
 		IS_ACTIVE: '$isActive',
 		GET_ICON_CLASS: '$getIconClass',
 		INITIAL_ORDERED_PROPERTY: '$$initialOrderedProperty',
-		IS_EDITING: '$isEditing'
+		IS_EDITING: '$isEditing',
+		ITEM_SN: '$$itemSn'
 	},
 	INDEX_ITEM = '$$index',
 	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
@@ -274,24 +275,30 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
 
 	function compile( tElement, tAttrs ) {
-		tAttrs.$set( 'ngRepeat', ( tAttrs.ptItem || '$item' ) + ' in ' + SN.LIST );
+		var ITEM_SN = getItemSn( tAttrs );
+
+		tAttrs.$set( 'ngRepeat', ITEM_SN + ' in ' + SN.LIST );
 		tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
 
 		var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
-		if ( customManageSn )
+		if ( customManageSn ) {
+			var INDEX = ITEM_SN + '.' + INDEX_ITEM;
 			tElement.append( '<td>' +
-				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '($index)">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '($index)" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '($index)" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
+				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + INDEX + ')">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + INDEX + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + INDEX + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
 				'</div>' +
-				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '($index)">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '($index)"><span class="fas fa-check"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '($index)"><span class="fas fa-times"></span></button>' +
+				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '(' + INDEX + ')">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '(' + INDEX + ')"><span class="fas fa-check"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + INDEX + ')"><span class="fas fa-times"></span></button>' +
 				'</div>' +
 				'</td>' );
+		}
 	}
 
 	function postLink( scope, iElement, iAttrs ) {
+		scope[ SN.ITEM_SN ] = getItemSn( iAttrs );
+
 		var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
 
 		if ( !itemManageOptions )
@@ -344,7 +351,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		}
 
 		function getItem( index ) {
-			return scope[ SN.LIST ][ index ];
+			return scope[ SN.TOTAL_LIST ][ index ];
 		}
 
 		function executeAfterPromise( promise, execute ) {
@@ -362,6 +369,10 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 			delete item[ IPN.IS_EDITING ];
 		}
 	}
+
+	function getItemSn( attrs ) {
+		return attrs.ptItem || '$item';
+	}
 }
 
 function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
@@ -369,7 +380,7 @@ function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 		return getCompiledDirectiveOptions( compile );
 
 		function compile( tElement, tAttrs ) {
-			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '($index)' );
+			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}}.' + INDEX_ITEM + ')' );
 		}
 	};
 }
