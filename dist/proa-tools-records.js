@@ -281,19 +281,17 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
 
 		var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
-		if ( customManageSn ) {
-			var INDEX = ITEM_SN + '.' + INDEX_ITEM;
+		if ( customManageSn )
 			tElement.append( '<td>' +
-				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + INDEX + ')">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + INDEX + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + INDEX + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
+				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
 				'</div>' +
-				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '(' + INDEX + ')">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '(' + INDEX + ')"><span class="fas fa-check"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + INDEX + ')"><span class="fas fa-times"></span></button>' +
+				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '(' + ITEM_SN + ')"><span class="fas fa-check"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + ITEM_SN + ')"><span class="fas fa-times"></span></button>' +
 				'</div>' +
 				'</td>' );
-		}
 	}
 
 	function postLink( scope, iElement, iAttrs ) {
@@ -310,48 +308,45 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		scope[ OSN.CANCEL_EDITION ] = cancelEdition;
 		scope[ SN.IS_EDITING ] = isEditing;
 
-		function startEdition( index ) {
-			var item = getItem( index );
+		function startEdition( item ) {
 			item[ IPN.OLD ] = angular.copy( item );
 			item[ IPN.IS_EDITING ] = true;
 		}
 
-		function deleteItem( index ) {
-			if ( confirmDeletion() ) {
-				var item = getItem( index );
+		function deleteItem( item ) {
+			if ( confirmDeletion() )
 				executeAfterPromise( itemManageOptions.delete( item ), function() {
 					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
 				} );
-			}
 		}
 
-		function edit( index ) {
-			var item = getItem( index );
+		function edit( item ) {
 			executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
-				endEdition( index );
+				endEdition( item );
 			} );
 		}
 
-		function cancelEdition( index ) {
-			var item = getItem( index );
+		function cancelEdition( item ) {
 			angular.forEach( item, function( value, key ) {
-				if ( key == IPN.OLD || key == IPN.IS_EDITING )
+				switch ( key ) {
+				case INDEX_ITEM:
+				case IPN.OLD:
+				case IPN.IS_EDITING:
+					break;
+				default:
 					return;
-				var oldValue = item[ IPN.OLD ][ key ];
-				if ( oldValue === undefined )
-					delete item[ key ];
-				else
-					item[ key ] = oldValue;
+					var oldValue = item[ IPN.OLD ][ key ];
+					if ( oldValue === undefined )
+						delete item[ key ];
+					else
+						item[ key ] = oldValue;
+				}
 			} );
-			endEdition( index );
+			endEdition( item );
 		}
 
-		function isEditing( index ) {
-			return getItem( index )[ IPN.IS_EDITING ];
-		}
-
-		function getItem( index ) {
-			return scope[ SN.TOTAL_LIST ][ index ];
+		function isEditing( item ) {
+			return item[ IPN.IS_EDITING ];
 		}
 
 		function executeAfterPromise( promise, execute ) {
@@ -363,8 +358,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 				execute();
 		}
 
-		function endEdition( index ) {
-			var item = getItem( index );
+		function endEdition( item ) {
 			delete item[ IPN.OLD ];
 			delete item[ IPN.IS_EDITING ];
 		}
@@ -380,7 +374,7 @@ function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 		return getCompiledDirectiveOptions( compile );
 
 		function compile( tElement, tAttrs ) {
-			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}}.' + INDEX_ITEM + ')' );
+			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
 		}
 	};
 }
