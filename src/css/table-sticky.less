@@ -1,6 +1,8 @@
 .table-sticky {
 	position: relative;
-	max-height: 50vh;
+	&.table-responsive {
+		overflow-x: visible;
+	}
 	> .table {
 		> caption + thead,
 		> colgroup + thead,
