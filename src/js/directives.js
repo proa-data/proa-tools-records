@@ -255,12 +255,12 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		if ( customManageSn )
 			tElement.append( '<td>' +
 				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit fa-fw"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash fa-fw"></span></button>' +
 				'</div>' +
 				'<div class="btn-group" role="toolbar" ng-if="' + customManageSn + '.edit" ng-show="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '(' + ITEM_SN + ')"><span class="fas fa-check"></span></button>' +
-				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + ITEM_SN + ')"><span class="fas fa-times"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.EDIT + '(' + ITEM_SN + ')"><span class="fas fa-check fa-fw"></span></button>' +
+				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + ITEM_SN + ')"><span class="fas fa-times fa-fw"></span></button>' +
 				'</div>' +
 				'</td>' );
 	}
