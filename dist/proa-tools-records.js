@@ -334,7 +334,6 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 				case IPN.IS_EDITING:
 					break;
 				default:
-					return;
 					var oldValue = item[ IPN.OLD ][ key ];
 					if ( oldValue === undefined )
 						delete item[ key ];
