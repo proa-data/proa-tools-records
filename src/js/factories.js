@@ -1,8 +1,7 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
-	.factory( 'confirmDeletion', confirmDeletion );
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
 	return function( compileContent, previousPostLink ) {
@@ -25,12 +24,6 @@ function getCompiledDirectiveOptions( $compile ) {
 				$compile( iElement )( scope );
 			}
 		};
-	};
-}
-
-function confirmDeletion( $window, PT_RECORDS_TEXTS ) {
-	return function() {
-		return $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation );
 	};
 }
 } )();

@@ -259,7 +259,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
+function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -314,7 +314,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		}
 
 		function deleteItem( item ) {
-			if ( confirmDeletion() )
+			if ( $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation ) )
 				executeAfterPromise( itemManageOptions.delete( item ), function() {
 					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
 				} );
@@ -422,8 +422,7 @@ function tableSticky() {
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
-	.factory( 'confirmDeletion', confirmDeletion );
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
 	return function( compileContent, previousPostLink ) {
@@ -446,12 +445,6 @@ function getCompiledDirectiveOptions( $compile ) {
 				$compile( iElement )( scope );
 			}
 		};
-	};
-}
-
-function confirmDeletion( $window, PT_RECORDS_TEXTS ) {
-	return function() {
-		return $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation );
 	};
 }
 } )();

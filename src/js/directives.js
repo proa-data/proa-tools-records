@@ -230,7 +230,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
+function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -285,7 +285,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		}
 
 		function deleteItem( item ) {
-			if ( confirmDeletion() )
+			if ( $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation ) )
 				executeAfterPromise( itemManageOptions.delete( item ), function() {
 					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
 				} );
