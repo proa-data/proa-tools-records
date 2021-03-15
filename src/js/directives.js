@@ -243,7 +243,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
+	return getCompiledDirectiveOptions( compile, postLink, { terminal: true } );
 
 	function compile( tElement, tAttrs ) {
 		var ITEM_SN = getItemSn( tAttrs );

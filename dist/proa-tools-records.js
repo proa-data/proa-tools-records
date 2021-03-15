@@ -272,7 +272,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
+	return getCompiledDirectiveOptions( compile, postLink, { terminal: true } );
 
 	function compile( tElement, tAttrs ) {
 		var ITEM_SN = getItemSn( tAttrs );
@@ -425,13 +425,11 @@ angular
 	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
-	return function( compileContent, previousPostLink ) {
-		return {
+	return function( compileContent, previousPostLink, definitionObj ) {
+		return angular.merge( {
 			restrict: 'A',
-			priority: 1000,
-			terminal: true,
 			compile: compile
-		};
+		}, definitionObj );
 
 		function compile( tElement, tAttrs ) {
 			compileContent( tElement, tAttrs );

@@ -4,13 +4,11 @@ angular
 	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
-	return function( compileContent, previousPostLink ) {
-		return {
+	return function( compileContent, previousPostLink, definitionObj ) {
+		return angular.merge( {
 			restrict: 'A',
-			priority: 1000,
-			terminal: true,
 			compile: compile
-		};
+		}, definitionObj );
 
 		function compile( tElement, tAttrs ) {
 			compileContent( tElement, tAttrs );
