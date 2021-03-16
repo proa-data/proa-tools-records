@@ -139,10 +139,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 
 			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
 
-			var parentEl = iElement.parent();
-			if ( parentEl.hasClass( 'table-responsive' ) )
-				iElement = parentEl;
-			iElement.before( compileElem( '<div class="clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
+			iElement.prepend( compileElem( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
 				'<div class="btn-group pull-right" role="toolbar">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.TOGGLE_PAGINATION + '()">' +
@@ -151,7 +148,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'</button>' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.EXPORT_TO_XLS + '()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
-				'</div>' ) );
+				'</caption>' ) );
 
 			function compileElem( elemOrHtml ) {
 				return $compile( elemOrHtml )( scope );

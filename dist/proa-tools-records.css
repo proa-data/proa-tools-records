@@ -2,6 +2,11 @@
  * Proa Tools Records v1.8.6 (https://github.com/proa-data/proa-tools-records)
  */
 
+caption.pt-records-toolbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  color: inherit;
+}
 .pagination.pagination-pt-records {
   margin: 0;
 }
