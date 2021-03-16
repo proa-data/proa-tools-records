@@ -56,7 +56,7 @@ var SN = { // Scope names
 	INDEX_ITEM = '$$index',
 	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
 
-function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
+function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 	var OSN = { // Own scope names
 		CURRENT_PAGE: '$currentPage',
 		ENABLED_PAGINATION: '$enabledPagination',
@@ -153,22 +153,9 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		}
 	}
 
-	function compile() {
-		return postLink;
-
-		function postLink( scope, iElement ) {
-			iElement
-				.find( 'tbody' )
-					.append( compileElem( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
-						Math.max(
-							addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
-							addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
-						) +
-						'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
-
-			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
-
-			iElement.prepend( compileElem( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
+	function compile( tElement ) {
+		tElement
+			.prepend( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
 				'<div class="btn-group pull-right" role="toolbar">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.TOGGLE_PAGINATION + '()">' +
@@ -177,23 +164,31 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'</button>' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.EXPORT_TO_XLS + '()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
-				'</caption>' ) );
+				'</caption>' )
+			.find( 'tbody' )
+				.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
+					Math.max(
+						addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
+						addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
+					) +
+					'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' );
 
-			function compileElem( elemOrHtml ) {
-				return $compile( elemOrHtml )( scope );
-			}
+		return postLink;
 
-			function addCellAndGetTotalCols( tagName, htmlContent ) {
-				var totalCols = 0;
-				iElement
-					.find( tagName + ' > tr:first' )
-						.prepend( compileElem( $( htmlContent ).prop( 'rowspan', iElement.find( tagName + ' > tr' ).length ).get( 0 ) ) )
-						.find( 'th, td' )
-							.each( function() {
-								totalCols += angular.element( this ).prop( 'colspan' );
-							} );
-				return totalCols;
-			}
+		function addCellAndGetTotalCols( tagName, htmlContent ) {
+			var totalCols = 0;
+			tElement
+				.find( tagName + ' > tr:first' )
+					.prepend( $( htmlContent ).prop( 'rowspan', tElement.find( tagName + ' > tr' ).length ).get( 0 ) )
+					.find( 'th, td' )
+						.each( function() {
+							totalCols += angular.element( this ).prop( 'colspan' );
+						} );
+			return totalCols;
+		}
+
+		function postLink( scope, iElement ) {
+			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
 		}
 	}
 }
