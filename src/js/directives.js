@@ -1,13 +1,18 @@
 ( function() {
+var DN = { // Directive names
+	PT_LIST: 'ptList',
+	PT_ITEM: 'ptItem'
+};
+
 angular
 	.module( 'proaTools.records' )
-	.directive( 'ptList', ptList )
+	.directive( DN.PT_LIST, ptList )
 	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
 	.directive( 'ptOrder', ptOrder )
 	.directive( 'ptOrderInit', ptOrderInit )
-	.directive( 'ptItem', ptItem )
+	.directive( DN.PT_ITEM, ptItem )
 	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
 	.directive( 'ptItemManageInput', ptItemManageInput )
@@ -187,7 +192,7 @@ function paginationNext( getPaginationDirectiveOptions ) {
 }
 
 function ptOrder( getCompiledDirectiveOptions ) {
-	return getCompiledDirectiveOptions( compile, postLink );
+	return getCompiledDirectiveOptions( compile, postLink, { require: '^^' + DN.PT_LIST } );
 
 	function compile( tElement, tAttrs ) {
 		var ptOrder = tAttrs.ptOrder;
@@ -235,7 +240,10 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return getCompiledDirectiveOptions( compile, postLink, { terminal: true } );
+	return getCompiledDirectiveOptions( compile, postLink, {
+		require: '^^' + DN.PT_LIST,
+		terminal: true
+	} );
 
 	function compile( tElement, tAttrs ) {
 		var ITEM_SN = getItemSn( tAttrs );
@@ -333,7 +341,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 
 function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 	return function( isInput ) {
-		return getCompiledDirectiveOptions( compile );
+		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + DN.PT_ITEM } );
 
 		function compile( tElement, tAttrs ) {
 			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
