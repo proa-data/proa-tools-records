@@ -1,17 +1,14 @@
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
-	.factory( 'confirmDeletion', confirmDeletion );
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
-	return function( compileContent, previousPostLink ) {
-		return {
+	return function( compileContent, previousPostLink, definitionObj ) {
+		return angular.merge( {
 			restrict: 'A',
-			priority: 1000,
-			terminal: true,
 			compile: compile
-		};
+		}, definitionObj );
 
 		function compile( tElement, tAttrs ) {
 			compileContent( tElement, tAttrs );
@@ -25,12 +22,6 @@ function getCompiledDirectiveOptions( $compile ) {
 				$compile( iElement )( scope );
 			}
 		};
-	};
-}
-
-function confirmDeletion( $window, PT_RECORDS_TEXTS ) {
-	return function() {
-		return $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation );
 	};
 }
 } )();
