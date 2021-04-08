@@ -56,7 +56,7 @@ var SN = { // Scope names
 	INDEX_ITEM = '$$index',
 	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
 
-function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
+function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 	var OSN = { // Own scope names
 		CURRENT_PAGE: '$currentPage',
 		ENABLED_PAGINATION: '$enabledPagination',
@@ -153,25 +153,9 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 		}
 	}
 
-	function compile() {
-		return postLink;
-
-		function postLink( scope, iElement ) {
-			iElement
-				.find( 'tbody' )
-					.append( compileElem( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
-						Math.max(
-							addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
-							addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
-						) +
-						'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' ) );
-
-			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
-
-			var parentEl = iElement.parent();
-			if ( parentEl.hasClass( 'table-responsive' ) )
-				iElement = parentEl;
-			iElement.before( compileElem( '<div class="clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
+	function compile( tElement ) {
+		tElement
+			.prepend( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
 				'<div class="btn-group pull-right" role="toolbar">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.TOGGLE_PAGINATION + '()">' +
@@ -180,23 +164,31 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS, $compile ) {
 				'</button>' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.EXPORT_TO_XLS + '()"><span class="fas fa-file-excel"></span></button>' +
 				'</div>' +
-				'</div>' ) );
+				'</caption>' )
+			.find( 'tbody' )
+				.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
+					Math.max(
+						addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
+						addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
+					) +
+					'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' );
 
-			function compileElem( elemOrHtml ) {
-				return $compile( elemOrHtml )( scope );
-			}
+		return postLink;
 
-			function addCellAndGetTotalCols( tagName, htmlContent ) {
-				var totalCols = 0;
-				iElement
-					.find( tagName + ' > tr:first' )
-						.prepend( compileElem( $( htmlContent ).prop( 'rowspan', iElement.find( tagName + ' > tr' ).length ).get( 0 ) ) )
-						.find( 'th, td' )
-							.each( function() {
-								totalCols += angular.element( this ).prop( 'colspan' );
-							} );
-				return totalCols;
-			}
+		function addCellAndGetTotalCols( tagName, htmlContent ) {
+			var totalCols = 0;
+			tElement
+				.find( tagName + ' > tr:first' )
+					.prepend( $( htmlContent ).prop( 'rowspan', tElement.find( tagName + ' > tr' ).length ).get( 0 ) )
+					.find( 'th, td' )
+						.each( function() {
+							totalCols += angular.element( this ).prop( 'colspan' );
+						} );
+			return totalCols;
+		}
+
+		function postLink( scope, iElement ) {
+			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
 		}
 	}
 }
@@ -259,7 +251,7 @@ function ptOrderInit() {
 	}
 }
 
-function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
+function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -272,7 +264,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return getCompiledDirectiveOptions( compile, postLink ); // Always necessary options: priority (1,000) and terminal (to true)
+	return getCompiledDirectiveOptions( compile, postLink, { terminal: true } );
 
 	function compile( tElement, tAttrs ) {
 		var ITEM_SN = getItemSn( tAttrs );
@@ -314,7 +306,7 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 		}
 
 		function deleteItem( item ) {
-			if ( confirmDeletion() )
+			if ( $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation ) )
 				executeAfterPromise( itemManageOptions.delete( item ), function() {
 					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
 				} );
@@ -334,7 +326,6 @@ function ptItem( getCompiledDirectiveOptions, confirmDeletion ) {
 				case IPN.IS_EDITING:
 					break;
 				default:
-					return;
 					var oldValue = item[ IPN.OLD ][ key ];
 					if ( oldValue === undefined )
 						delete item[ key ];
@@ -423,17 +414,14 @@ function tableSticky() {
 ( function() {
 angular
 	.module( 'proaTools.records' )
-	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions )
-	.factory( 'confirmDeletion', confirmDeletion );
+	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
 function getCompiledDirectiveOptions( $compile ) {
-	return function( compileContent, previousPostLink ) {
-		return {
+	return function( compileContent, previousPostLink, definitionObj ) {
+		return angular.merge( {
 			restrict: 'A',
-			priority: 1000,
-			terminal: true,
 			compile: compile
-		};
+		}, definitionObj );
 
 		function compile( tElement, tAttrs ) {
 			compileContent( tElement, tAttrs );
@@ -447,12 +435,6 @@ function getCompiledDirectiveOptions( $compile ) {
 				$compile( iElement )( scope );
 			}
 		};
-	};
-}
-
-function confirmDeletion( $window, PT_RECORDS_TEXTS ) {
-	return function() {
-		return $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation );
 	};
 }
 } )();
