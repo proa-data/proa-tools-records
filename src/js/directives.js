@@ -216,6 +216,7 @@ function ptOrder( getCompiledDirectiveOptions ) {
 function ptOrderInit() {
 	return {
 		restrict: 'A',
+		require: '^^' + DN.PT_LIST,
 		link: link
 	};
 
@@ -347,7 +348,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 
 function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 	return function( isInput ) {
-		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + DN.PT_ITEM } );
+		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + DN.PT_LIST } );
 
 		function compile( tElement, tAttrs ) {
 			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
