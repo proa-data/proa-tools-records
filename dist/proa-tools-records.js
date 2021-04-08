@@ -30,6 +30,8 @@ angular
 ( function() {
 var DN = { // Directive names
 	PT_LIST: 'ptList',
+	PT_ORDER: 'ptOrder',
+	PT_ORDER_INIT: 'ptOrderInit',
 	PT_ITEM: 'ptItem'
 };
 
@@ -39,8 +41,8 @@ angular
 	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
-	.directive( 'ptOrder', ptOrder )
-	.directive( 'ptOrderInit', ptOrderInit )
+	.directive( DN.PT_ORDER, ptOrder )
+	.directive( DN.PT_ORDER_INIT, ptOrderInit )
 	.directive( DN.PT_ITEM, ptItem )
 	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
@@ -102,7 +104,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 		activate();
 
 		function activate() {
-			$scope.$watchCollection( $attrs.ptList, function( newCollection ) {
+			$scope.$watchCollection( $attrs[ DN.PT_LIST ], function( newCollection ) {
 				angular.forEach( newCollection, function( item, i ) {
 					item[ INDEX_ITEM ] = i;
 				} );
@@ -224,15 +226,19 @@ function ptOrder( getCompiledDirectiveOptions ) {
 	return getCompiledDirectiveOptions( compile, postLink, { require: '^^' + DN.PT_LIST } );
 
 	function compile( tElement, tAttrs ) {
-		var ptOrder = tAttrs.ptOrder;
-		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(\'' + ptOrder + '\')}" ng-click="' + SN.SORT + '(\'' + ptOrder + '\')">' +
-			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(\'' + ptOrder + '\')"></span>' +
+		var propStr = '\'' + getPropName( tAttrs ) + '\'';
+		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + propStr + ')}" ng-click="' + SN.SORT + '(' + propStr + ')">' +
+			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(' + propStr + ')"></span>' +
 			'</button>' );
 	}
 
 	function postLink( scope, iElement, iAttrs ) {
-		if ( iAttrs.ptOrderInit )
-			scope[ SN.INITIAL_ORDERED_PROPERTY ] = iAttrs.ptOrder;
+		if ( iAttrs[ DN.PT_ORDER_INIT ] )
+			scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( iAttrs );
+	}
+
+	function getPropName( attrs ) {
+		return attrs[ DN.PT_ORDER ];
 	}
 }
 
@@ -364,7 +370,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 	}
 
 	function getItemSn( attrs ) {
-		return attrs.ptItem || '$item';
+		return attrs[ DN.PT_ITEM ] || '$item';
 	}
 }
 
