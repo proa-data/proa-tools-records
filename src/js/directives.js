@@ -1,20 +1,15 @@
 ( function() {
-var DN = { // Directive names
-	PT_LIST: 'ptList',
-	PT_ORDER: 'ptOrder',
-	PT_ORDER_INIT: 'ptOrderInit',
-	PT_ITEM: 'ptItem'
-};
+var PT_LIST = 'ptList';
 
 angular
 	.module( 'proaTools.records' )
-	.directive( DN.PT_LIST, ptList )
+	.directive( 'ptList', ptList )
 	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
-	.directive( DN.PT_ORDER, ptOrder )
-	.directive( DN.PT_ORDER_INIT, ptOrderInit )
-	.directive( DN.PT_ITEM, ptItem )
+	.directive( 'ptOrder', ptOrder )
+	.directive( 'ptOrderInit', ptOrderInit )
+	.directive( 'ptItem', ptItem )
 	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
 	.directive( 'ptItemManageOutput', ptItemManageOutput )
 	.directive( 'ptItemManageInput', ptItemManageInput )
@@ -75,7 +70,7 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 		activate();
 
 		function activate() {
-			$scope.$watchCollection( $attrs[ DN.PT_LIST ], function( newCollection ) {
+			$scope.$watchCollection( $attrs[ PT_LIST ], function( newCollection ) {
 				angular.forEach( newCollection, function( item, i ) {
 					item[ INDEX_ITEM ] = i;
 				} );
@@ -194,7 +189,7 @@ function paginationNext( getPaginationDirectiveOptions ) {
 }
 
 function ptOrder( getCompiledDirectiveOptions ) {
-	return getCompiledDirectiveOptions( compile, postLink, { require: '^^' + DN.PT_LIST } );
+	return getCompiledDirectiveOptions( compile, postLink, { require: '^^' + PT_LIST } );
 
 	function compile( tElement, tAttrs ) {
 		var propStr = '\'' + getPropName( tAttrs ) + '\'';
@@ -204,19 +199,19 @@ function ptOrder( getCompiledDirectiveOptions ) {
 	}
 
 	function postLink( scope, iElement, iAttrs ) {
-		if ( iAttrs[ DN.PT_ORDER_INIT ] )
+		if ( iAttrs.ptOrderInit )
 			scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( iAttrs );
 	}
 
 	function getPropName( attrs ) {
-		return attrs[ DN.PT_ORDER ];
+		return attrs.ptOrder;
 	}
 }
 
 function ptOrderInit() {
 	return {
 		restrict: 'A',
-		require: '^^' + DN.PT_LIST,
+		require: '^^' + PT_LIST,
 		link: link
 	};
 
@@ -248,7 +243,7 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 		};
 
 	return getCompiledDirectiveOptions( compile, postLink, {
-		require: '^^' + DN.PT_LIST,
+		require: '^^' + PT_LIST,
 		terminal: true
 	} );
 
@@ -342,13 +337,13 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 	}
 
 	function getItemSn( attrs ) {
-		return attrs[ DN.PT_ITEM ] || '$item';
+		return attrs.ptItem || '$item';
 	}
 }
 
 function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
 	return function( isInput ) {
-		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + DN.PT_LIST } );
+		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + PT_LIST } );
 
 		function compile( tElement, tAttrs ) {
 			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
