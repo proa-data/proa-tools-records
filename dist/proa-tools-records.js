@@ -37,11 +37,8 @@ angular
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
 	.directive( 'ptOrder', ptOrder )
-	.directive( 'ptOrderInit', ptOrderInit )
 	.directive( 'ptItem', ptItem )
-	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
-	.directive( 'ptItemManageOutput', ptItemManageOutput )
-	.directive( 'ptItemManageInput', ptItemManageInput )
+	.directive( 'ptItemManage', ptItemManage )
 	.directive( 'tableSticky', tableSticky );
 
 var SN = { // Scope names
@@ -155,7 +152,8 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 		}
 	}
 
-	function compile( tElement ) {
+	function compile( tElement, tAttrs ) {
+		var ATTR = 'pt-item';
 		tElement
 			.prepend( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
@@ -173,7 +171,12 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 						addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
 						addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
 					) +
-					'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' );
+					'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' )
+				.find( '[' + ATTR + ']' )
+					.each( function() {
+						var elem = $( this );
+						elem.attr( 'ng-repeat', getItemSn( elem.attr( ATTR ) ) + ' in ' + SN.LIST );
+					} );
 
 		return postLink;
 
@@ -217,48 +220,46 @@ function paginationNext( getPaginationDirectiveOptions ) {
 	return getPaginationDirectiveOptions( true );
 }
 
-function ptOrder( getCompiledDirectiveOptions ) {
-	return getCompiledDirectiveOptions( compile, postLink, { require: '^^' + PT_LIST } );
+function ptOrder() {
+	return {
+		restrict: 'A',
+		require: '^^' + PT_LIST,
+		compile: compile
+	};
 
 	function compile( tElement, tAttrs ) {
 		var propStr = '\'' + getPropName( tAttrs ) + '\'';
 		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + propStr + ')}" ng-click="' + SN.SORT + '(' + propStr + ')">' +
 			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(' + propStr + ')"></span>' +
 			'</button>' );
-	}
 
-	function postLink( scope, iElement, iAttrs ) {
-		if ( iAttrs.ptOrderInit )
-			scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( iAttrs );
-	}
+		return postLink;
 
-	function getPropName( attrs ) {
-		return attrs.ptOrder;
-	}
-}
+		function postLink( scope, iElement, iAttrs ) {
+			var orderInit = iAttrs.ptOrderInit;
+			if ( orderInit ) {
+				scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( iAttrs );
 
-function ptOrderInit() {
-	return {
-		restrict: 'A',
-		require: '^^' + PT_LIST,
-		link: link
-	};
+				switch ( orderInit ) {
+				case 'desc':
+					sort();
+				case 'asc':
+					sort();
+				}
+			}
 
-	function link( scope, iElement, iAttrs ) {
-		switch ( iAttrs[ this.name ] ) {
-		case 'desc':
-			sort();
-		case 'asc':
-			sort();
+			function sort() {
+				scope[ SN.SORT ]( scope[ SN.INITIAL_ORDERED_PROPERTY ] );
+			}
 		}
 
-		function sort() {
-			scope[ SN.SORT ]( scope[ SN.INITIAL_ORDERED_PROPERTY ] );
+		function getPropName( attrs ) {
+			return attrs.ptOrder;
 		}
 	}
 }
 
-function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
+function ptItem( $window, PT_RECORDS_TEXTS ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
 		IPN = { // Item property name
 			OLD: '$$old',
@@ -271,19 +272,19 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 			CANCEL_EDITION: '$cancelEdition'
 		};
 
-	return getCompiledDirectiveOptions( compile, postLink, {
+	return {
+		restrict: 'A',
 		require: '^^' + PT_LIST,
-		terminal: true
-	} );
+		compile: compile,
+		priority: 1001 // Executed before "ngRepeat"
+	};
 
 	function compile( tElement, tAttrs ) {
-		var ITEM_SN = getItemSn( tAttrs );
-
-		tAttrs.$set( 'ngRepeat', ITEM_SN + ' in ' + SN.LIST );
 		tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
 
 		var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
-		if ( customManageSn )
+		if ( customManageSn ) {
+			var ITEM_SN = getItemSn( tAttrs[ this.name ] );
 			tElement.append( '<td>' +
 				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit fa-fw"></span></button>' +
@@ -294,98 +295,95 @@ function ptItem( getCompiledDirectiveOptions, $window, PT_RECORDS_TEXTS ) {
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.CANCEL_EDITION + '(' + ITEM_SN + ')"><span class="fas fa-times fa-fw"></span></button>' +
 				'</div>' +
 				'</td>' );
-	}
-
-	function postLink( scope, iElement, iAttrs ) {
-		scope[ SN.ITEM_SN ] = getItemSn( iAttrs );
-
-		var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
-
-		if ( !itemManageOptions )
-			return;
-
-		scope[ OSN.START_EDITION ] = startEdition;
-		scope[ OSN.DELETE ] = deleteItem;
-		scope[ OSN.EDIT ] = edit;
-		scope[ OSN.CANCEL_EDITION ] = cancelEdition;
-		scope[ SN.IS_EDITING ] = isEditing;
-
-		function startEdition( item ) {
-			item[ IPN.OLD ] = angular.copy( item );
-			item[ IPN.IS_EDITING ] = true;
 		}
 
-		function deleteItem( item ) {
-			if ( $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation ) )
-				executeAfterPromise( itemManageOptions.delete( item ), function() {
-					scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
+		return postLink;
+
+		function postLink( scope, iElement, iAttrs ) {
+			scope[ SN.ITEM_SN ] = getItemSn( iAttrs[ this.name ] );
+
+			var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
+
+			if ( !itemManageOptions )
+				return;
+
+			scope[ OSN.START_EDITION ] = startEdition;
+			scope[ OSN.DELETE ] = deleteItem;
+			scope[ OSN.EDIT ] = edit;
+			scope[ OSN.CANCEL_EDITION ] = cancelEdition;
+			scope[ SN.IS_EDITING ] = isEditing;
+
+			function startEdition( item ) {
+				item[ IPN.OLD ] = angular.copy( item );
+				item[ IPN.IS_EDITING ] = true;
+			}
+
+			function deleteItem( item ) {
+				if ( $window.confirm( PT_RECORDS_TEXTS.deletionConfirmation ) )
+					executeAfterPromise( itemManageOptions.delete( item ), function() {
+						scope[ SN.TOTAL_LIST ].splice( item[ INDEX_ITEM ], 1 );
+					} );
+			}
+
+			function edit( item ) {
+				executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
+					endEdition( item );
 				} );
-		}
+			}
 
-		function edit( item ) {
-			executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
+			function cancelEdition( item ) {
+				angular.forEach( item, function( value, key ) {
+					switch ( key ) {
+					case INDEX_ITEM:
+					case IPN.OLD:
+					case IPN.IS_EDITING:
+						break;
+					default:
+						var oldValue = item[ IPN.OLD ][ key ];
+						if ( oldValue === undefined )
+							delete item[ key ];
+						else
+							item[ key ] = oldValue;
+					}
+				} );
 				endEdition( item );
-			} );
-		}
+			}
 
-		function cancelEdition( item ) {
-			angular.forEach( item, function( value, key ) {
-				switch ( key ) {
-				case INDEX_ITEM:
-				case IPN.OLD:
-				case IPN.IS_EDITING:
-					break;
-				default:
-					var oldValue = item[ IPN.OLD ][ key ];
-					if ( oldValue === undefined )
-						delete item[ key ];
-					else
-						item[ key ] = oldValue;
-				}
-			} );
-			endEdition( item );
-		}
+			function isEditing( item ) {
+				return item[ IPN.IS_EDITING ];
+			}
 
-		function isEditing( item ) {
-			return item[ IPN.IS_EDITING ];
-		}
-
-		function executeAfterPromise( promise, execute ) {
-			if ( promise && promise.then )
-				promise.then( function() {
+			function executeAfterPromise( promise, execute ) {
+				if ( promise && promise.then )
+					promise.then( function() {
+						execute();
+					} );
+				else
 					execute();
-				} );
-			else
-				execute();
-		}
+			}
 
-		function endEdition( item ) {
-			delete item[ IPN.OLD ];
-			delete item[ IPN.IS_EDITING ];
+			function endEdition( item ) {
+				delete item[ IPN.OLD ];
+				delete item[ IPN.IS_EDITING ];
+			}
 		}
-	}
-
-	function getItemSn( attrs ) {
-		return attrs.ptItem || '$item';
 	}
 }
 
-function getPtItemManageDirectiveOptions( getCompiledDirectiveOptions ) {
-	return function( isInput ) {
-		return getCompiledDirectiveOptions( compile, undefined, { require: '^^' + PT_LIST } );
-
-		function compile( tElement, tAttrs ) {
-			tAttrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
-		}
+function ptItemManage() {
+	return {
+		restrict: 'A',
+		compile: compile
 	};
-}
 
-function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
-	return getPtItemManageDirectiveOptions();
-}
-
-function ptItemManageInput( getPtItemManageDirectiveOptions ) {
-	return getPtItemManageDirectiveOptions( true );
+	function compile( tElement ) {
+		var ATTR_PREXIX = 'pt-item-manage-',
+			ATTR = ATTR_PREXIX + 'output';
+		tElement.find( '[' + ATTR + '],[' + ATTR_PREXIX + 'input]' ).each( function() {
+			var elem = $( this );
+			elem.attr( angular.isDefined( elem.attr( ATTR ) ) ? 'ng-hide' : 'ng-show', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
+		} );
+	}
 }
 
 function tableSticky() {
@@ -420,31 +418,8 @@ function tableSticky() {
 		}
 	}
 }
-} )();
-( function() {
-angular
-	.module( 'proaTools.records' )
-	.factory( 'getCompiledDirectiveOptions', getCompiledDirectiveOptions );
 
-function getCompiledDirectiveOptions( $compile ) {
-	return function( compileContent, previousPostLink, definitionObj ) {
-		return angular.merge( {
-			restrict: 'A',
-			compile: compile
-		}, definitionObj );
-
-		function compile( tElement, tAttrs ) {
-			compileContent( tElement, tAttrs );
-			return postLink;
-
-			function postLink( scope, iElement, iAttrs ) {
-				if ( previousPostLink )
-					previousPostLink( scope, iElement, iAttrs );
-
-				iElement.removeAttr( iAttrs.$attr[ this.name ] );
-				$compile( iElement )( scope );
-			}
-		};
-	};
+function getItemSn( str ) {
+	return str || '$item';
 }
 } )();

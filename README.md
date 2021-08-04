@@ -34,7 +34,7 @@ It needs the previous (pagination) directives.
 
 To sorting a column, insert it with a property name in a `th` of table heading. This creates an interactive button with 3 clicks (ascending, descending and null order).
 
-#### `ptOrderInit`
+#### `pt-order-init`
 
 In the beginning, you can indicate the initial and unique order (ascending or descending) of a column through this attribute (with `asc` or `desc` values, respectively).
 
@@ -50,15 +50,15 @@ Contains the spreadsheet filename.
 
 It is possible (optionally) to edit and delete each item.
 
-#### `pt-item-manage`
+#### `ptItemManage`
 
 An object (property on scope) is passed here. It must to be formed by one or two functions: `edit` and/or `delete`.
 
-#### `ptItemManageOutput`
+#### `pt-item-manage-output`
 
 Place on HTML elements (usually interpolated `span`s) that have to be hidden in editing mode.
 
-#### `ptItemManageInput`
+#### `pt-item-manage-input`
 
 The opposite: Form controls (`input`, `select`, `textarea`...) are displayed when editing.
 
