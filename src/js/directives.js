@@ -4,6 +4,8 @@ var PT_LIST = 'ptList';
 angular
 	.module( 'proaTools.records' )
 	.directive( 'ptList', ptList )
+	.directive( 'ptListLabels', ptListLabels )
+	.directive( 'ptListValues', ptListValues )
 	.factory( 'getPaginationDirectiveOptions', getPaginationDirectiveOptions )
 	.directive( 'paginationPrev', paginationPrev )
 	.directive( 'paginationNext', paginationNext )
@@ -26,7 +28,7 @@ var SN = { // Scope names
 	INDEX_ITEM = '$$index',
 	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
 
-function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
+function ptList( $filter, uibPaginationConfig ) {
 	var OSN = { // Own scope names
 		CURRENT_PAGE: '$currentPage',
 		ENABLED_PAGINATION: '$enabledPagination',
@@ -137,35 +139,47 @@ function ptList( $filter, uibPaginationConfig, PT_RECORDS_TEXTS ) {
 				'</div>' +
 				'</caption>' )
 			.find( 'tbody' )
-				.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="' +
-					Math.max(
-						addCellAndGetTotalCols( 'thead', '<th>' + PT_RECORDS_TEXTS.number + '</th>' ),
-						addCellAndGetTotalCols( 'tfoot', '<th class="invisible"></th>' )
-					) +
-					'">' + PT_RECORDS_TEXTS.noData + '</td></tr>' )
+				.attr( 'pt-list-values', '' )
 				.find( '[' + ATTR + ']' )
 					.each( function() {
 						var elem = $( this );
 						elem.attr( 'ng-repeat', getItemSn( elem.attr( ATTR ) ) + ' in ' + SN.LIST );
-					} );
+					} )
+				.end()
+			.end()
+			.find( 'thead,tfoot' )
+				.find( 'tr:first' )
+					.attr( 'pt-list-labels', '' );
 
 		return postLink;
-
-		function addCellAndGetTotalCols( tagName, htmlContent ) {
-			var totalCols = 0;
-			tElement
-				.find( tagName + ' > tr:first' )
-					.prepend( $( htmlContent ).prop( 'rowspan', tElement.find( tagName + ' > tr' ).length ).get( 0 ) )
-					.find( 'th, td' )
-						.each( function() {
-							totalCols += angular.element( this ).prop( 'colspan' );
-						} );
-			return totalCols;
-		}
 
 		function postLink( scope, iElement ) {
 			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
 		}
+	}
+}
+
+function ptListLabels( PT_RECORDS_TEXTS ) {
+	return {
+		restrict: 'A',
+		compile: compile
+	};
+
+	function compile( tElement ) {
+		var elem = tElement.parent();
+		tElement.prepend( $( elem.is( 'thead' ) ? '<th>' + PT_RECORDS_TEXTS.number + '</th>' : '<th class="invisible"></th>' ).prop( 'rowspan', elem.find( 'tr' ).length ) );
+	}
+}
+
+function ptListValues( PT_RECORDS_TEXTS ) {
+	return {
+		restrict: 'A',
+		compile: compile
+	};
+
+	function compile( tElement ) {
+		tElement.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="9999">' + // Huge number of columns
+			PT_RECORDS_TEXTS.noData + '</td></tr>' );
 	}
 }
 
