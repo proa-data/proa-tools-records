@@ -125,9 +125,9 @@ function ptList( $filter, uibPaginationConfig ) {
 		}
 	}
 
-	function compile( tElement, tAttrs ) {
+	function compile( element ) {
 		var ATTR = 'pt-item';
-		tElement
+		element
 			.prepend( '<caption class="pt-records-toolbar clearfix" ng-show="' + SN.TOTAL_LIST + '.length">' +
 				'<ul uib-pagination total-items="' + SN.TOTAL_LIST + '.length" ng-model="' + OSN.CURRENT_PAGE + '" class="' + PT_PAGINATION_CLASS_NAME + ' pull-left" ng-show="' + OSN.ENABLED_PAGINATION + '"></ul>' +
 				'<div class="btn-group pull-right" role="toolbar">' +
@@ -153,8 +153,8 @@ function ptList( $filter, uibPaginationConfig ) {
 
 		return postLink;
 
-		function postLink( scope, iElement ) {
-			scope[ OSN.EXPORTING_TABLE ] = iElement.get( 0 );
+		function postLink( scope, element ) {
+			scope[ OSN.EXPORTING_TABLE ] = element.get( 0 );
 		}
 	}
 }
@@ -165,9 +165,9 @@ function ptListLabels( PT_RECORDS_TEXTS ) {
 		compile: compile
 	};
 
-	function compile( tElement ) {
-		var elem = tElement.parent();
-		tElement.prepend( $( elem.is( 'thead' ) ? '<th>' + PT_RECORDS_TEXTS.number + '</th>' : '<th class="invisible"></th>' ).prop( 'rowspan', elem.find( 'tr' ).length ) );
+	function compile( element ) {
+		var elem = element.parent();
+		element.prepend( $( elem.is( 'thead' ) ? '<th>' + PT_RECORDS_TEXTS.number + '</th>' : '<th class="invisible"></th>' ).prop( 'rowspan', elem.find( 'tr' ).length ) );
 	}
 }
 
@@ -177,8 +177,8 @@ function ptListValues( PT_RECORDS_TEXTS ) {
 		compile: compile
 	};
 
-	function compile( tElement ) {
-		tElement.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="9999">' + // Huge number of columns
+	function compile( element ) {
+		element.append( '<tr ng-if="!' + SN.TOTAL_LIST + '.length"><td colspan="9999">' + // Huge number of columns
 			PT_RECORDS_TEXTS.noData + '</td></tr>' );
 	}
 }
@@ -190,9 +190,9 @@ function getPaginationDirectiveOptions( $compile ) {
 			link: link // No compile function because of UI Bootstrap register
 		};
 
-		function link( scope, iElement ) {
-			if ( iElement.parent( '.pagination.' + PT_PAGINATION_CLASS_NAME ).length )
-				iElement.children( 'a' ).html( $compile( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' )( scope ) );
+		function link( scope, element ) {
+			if ( element.parent( '.pagination.' + PT_PAGINATION_CLASS_NAME ).length )
+				element.children( 'a' ).html( $compile( '<span class="fas fa-chevron-' + ( isNext ? 'right' : 'left' ) + '"></span>' )( scope ) );
 		}
 	};
 }
@@ -212,18 +212,18 @@ function ptOrder() {
 		compile: compile
 	};
 
-	function compile( tElement, tAttrs ) {
-		var propStr = '\'' + getPropName( tAttrs ) + '\'';
-		tElement.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + propStr + ')}" ng-click="' + SN.SORT + '(' + propStr + ')">' +
+	function compile( element, attrs ) {
+		var propStr = '\'' + getPropName( attrs ) + '\'';
+		element.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + propStr + ')}" ng-click="' + SN.SORT + '(' + propStr + ')">' +
 			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(' + propStr + ')"></span>' +
 			'</button>' );
 
 		return postLink;
 
-		function postLink( scope, iElement, iAttrs ) {
-			var orderInit = iAttrs.ptOrderInit;
+		function postLink( scope, element, attrs ) {
+			var orderInit = attrs.ptOrderInit;
 			if ( orderInit ) {
-				scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( iAttrs );
+				scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( attrs );
 
 				switch ( orderInit ) {
 				case 'desc':
@@ -261,16 +261,16 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 		restrict: 'A',
 		require: '^^' + PT_LIST,
 		compile: compile,
-		priority: 1001 // Executed before "ngRepeat"
+		priority: 1001 // Executed before added "ngRepeat"
 	};
 
-	function compile( tElement, tAttrs ) {
-		tElement.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
+	function compile( element, attrs ) {
+		element.prepend( '<td class="text-right">{{' + SN.GET_ROW_NUMBER + '($index) | number}}</td>' );
 
-		var customManageSn = tAttrs[ MANAGE_ATTR_NAME ];
+		var customManageSn = attrs[ MANAGE_ATTR_NAME ];
 		if ( customManageSn ) {
-			var ITEM_SN = getItemSn( tAttrs[ this.name ] );
-			tElement.append( '<td>' +
+			var ITEM_SN = getItemSn( attrs[ this.name ] );
+			element.append( '<td>' +
 				'<div class="btn-group" role="toolbar" ng-hide="' + SN.IS_EDITING + '(' + ITEM_SN + ')">' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.START_EDITION + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.edit"><span class="fas fa-edit fa-fw"></span></button>' +
 				'<button type="button" class="btn btn-default" ng-click="' + OSN.DELETE + '(' + ITEM_SN + ')" ng-if="' + customManageSn + '.delete"><span class="fas fa-trash fa-fw"></span></button>' +
@@ -284,10 +284,10 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 
 		return postLink;
 
-		function postLink( scope, iElement, iAttrs ) {
-			scope[ SN.ITEM_SN ] = getItemSn( iAttrs[ this.name ] );
+		function postLink( scope, element, attrs ) {
+			scope[ SN.ITEM_SN ] = getItemSn( attrs[ this.name ] );
 
-			var itemManageOptions = scope.$eval( iAttrs[ MANAGE_ATTR_NAME ] );
+			var itemManageOptions = scope.$eval( attrs[ MANAGE_ATTR_NAME ] );
 
 			if ( !itemManageOptions )
 				return;
@@ -361,10 +361,10 @@ function ptItemManage() {
 		compile: compile
 	};
 
-	function compile( tElement ) {
+	function compile( element ) {
 		var ATTR_PREXIX = 'pt-item-manage-',
 			ATTR = ATTR_PREXIX + 'output';
-		tElement.find( '[' + ATTR + '],[' + ATTR_PREXIX + 'input]' ).each( function() {
+		element.find( '[' + ATTR + '],[' + ATTR_PREXIX + 'input]' ).each( function() {
 			var elem = $( this );
 			elem.attr( angular.isDefined( elem.attr( ATTR ) ) ? 'ng-hide' : 'ng-show', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
 		} );
@@ -377,8 +377,8 @@ function tableSticky() {
 		link: link
 	};
 
-	function link( scope, iElement ) {
-		var parentElem = iElement.children( '.table' ),
+	function link( scope, element ) {
+		var parentElem = element.children( '.table' ),
 			captionHeight = parentElem.find( 'caption' ).outerHeight() || 0;
 
 		setPosition( 'caption + thead, colgroup + thead, thead:first-child', ':first-child', 'top', getTopPosition );
