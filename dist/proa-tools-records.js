@@ -237,21 +237,30 @@ function paginationNext( getPaginationDirectiveOptions ) {
 function ptOrder() {
 	return {
 		restrict: 'A',
+		scope: true,
 		compile: compile
 	};
 
-	function compile( element, attrs ) {
-		var propStr = '\'' + getPropName( attrs ) + '\'';
-		element.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + propStr + ')}" ng-click="' + SN.SORT + '(' + propStr + ')">' +
-			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(' + propStr + ')"></span>' +
+	function compile( element ) {
+		var PROP_SN = '$prop';
+		element.append( '<button type="button" class="btn btn-default btn-xs pull-right btn-pt-records" ng-class="{active: ' + SN.IS_ACTIVE + '(' + PROP_SN + ')}" ng-click="' + SN.SORT + '(' + PROP_SN + ')">' +
+			'<span class="fas" ng-class="' + SN.GET_ICON_CLASS + '(' + PROP_SN + ')"></span>' +
 			'</button>' );
 
 		return postLink;
 
 		function postLink( scope, element, attrs ) {
+			var directiveName = this.name;
+
+			scope.$watch( function() {
+				return attrs[ directiveName ];
+			}, function( prop ) {
+				scope[ PROP_SN ] = prop;
+			} );
+
 			var orderInit = attrs.ptOrderInit;
 			if ( orderInit ) {
-				scope[ SN.INITIAL_ORDERED_PROPERTY ] = getPropName( attrs );
+				scope[ SN.INITIAL_ORDERED_PROPERTY ] = attrs[ directiveName ];
 
 				switch ( orderInit ) {
 				case 'desc':
@@ -264,10 +273,6 @@ function ptOrder() {
 			function sort() {
 				scope[ SN.SORT ]( scope[ SN.INITIAL_ORDERED_PROPERTY ] );
 			}
-		}
-
-		function getPropName( attrs ) {
-			return attrs.ptOrder;
 		}
 	}
 }
