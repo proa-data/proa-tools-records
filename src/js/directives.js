@@ -1,6 +1,4 @@
 ( function() {
-var PT_LIST = 'ptList';
-
 angular
 	.module( 'proaTools.records' )
 	.directive( 'ptList', ptList )
@@ -71,7 +69,7 @@ function ptList( $filter, uibPaginationConfig ) {
 		activate();
 
 		function activate() {
-			$scope.$watchCollection( $attrs[ PT_LIST ], function( newCollection ) {
+			$scope.$watchCollection( $attrs[ 'ptList' ], function( newCollection ) {
 				angular.forEach( newCollection, function( item, i ) {
 					item[ INDEX_ITEM ] = i;
 				} );
@@ -210,7 +208,6 @@ function paginationNext( getPaginationDirectiveOptions ) {
 function ptOrder() {
 	return {
 		restrict: 'A',
-		require: '^^' + PT_LIST,
 		compile: compile
 	};
 
@@ -261,7 +258,6 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 
 	return {
 		restrict: 'A',
-		require: '^^' + PT_LIST,
 		compile: compile,
 		priority: 1001 // Executed before added "ngRepeat"
 	};
@@ -361,7 +357,6 @@ function getPtItemManageDirectiveOptions( $compile ) {
 	return function( isInput ) {
 		return {
 			restrict: 'A',
-			require: '^^' + PT_LIST,
 			compile: compile
 		};
 
