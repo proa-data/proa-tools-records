@@ -11,7 +11,9 @@ angular
 	.directive( 'paginationNext', paginationNext )
 	.directive( 'ptOrder', ptOrder )
 	.directive( 'ptItem', ptItem )
-	.directive( 'ptItemManage', ptItemManage )
+	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
+	.directive( 'ptItemManageInput', ptItemManageInput )
+	.directive( 'ptItemManageOutput', ptItemManageOutput )
 	.directive( 'tableSticky', tableSticky );
 
 var SN = { // Scope names
@@ -355,20 +357,33 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 	}
 }
 
-function ptItemManage() {
-	return {
-		restrict: 'A',
-		compile: compile
-	};
+function getPtItemManageDirectiveOptions( $compile ) {
+	return function( isInput ) {
+		return {
+			restrict: 'A',
+			require: '^^' + PT_LIST,
+			compile: compile
+		};
 
-	function compile( element ) {
-		var ATTR_PREXIX = 'pt-item-manage-',
-			ATTR = ATTR_PREXIX + 'output';
-		element.find( '[' + ATTR + '],[' + ATTR_PREXIX + 'input]' ).each( function() {
-			var elem = $( this );
-			elem.attr( angular.isDefined( elem.attr( ATTR ) ) ? 'ng-hide' : 'ng-show', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
-		} );
-	}
+		function compile( element, attrs ) {
+			attrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
+
+			return postLink;
+
+			function postLink( scope, element, attrs ) {
+				attrs.$set( this.name, null );
+				$compile( element )( scope );
+			}
+		}
+	};
+}
+
+function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions();
+}
+
+function ptItemManageInput( getPtItemManageDirectiveOptions ) {
+	return getPtItemManageDirectiveOptions( true );
 }
 
 function tableSticky() {

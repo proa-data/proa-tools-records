@@ -50,15 +50,15 @@ Contains the spreadsheet filename.
 
 It is possible (optionally) to edit and delete each item.
 
-#### `ptItemManage`
+#### `pt-item-manage`
 
 An object (property on scope) is passed here. It must to be formed by one or two functions: `edit` and/or `delete`.
 
-#### `pt-item-manage-output`
+#### `ptItemManageOutput`
 
 Place on HTML elements (usually interpolated `span`s) that have to be hidden in editing mode.
 
-#### `pt-item-manage-input`
+#### `ptItemManageInput`
 
 The opposite: Form controls (`input`, `select`, `textarea`...) are displayed when editing.
 
