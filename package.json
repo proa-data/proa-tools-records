@@ -1,6 +1,6 @@
 {
   "name": "proa-tools-records",
-  "version": "1.8.8",
+  "version": "1.9.0",
   "description": "Control (pagination, ordering, data exporting and management) of records within tables using mainly AngularJS and Bootstrap 3.",
   "main": "gulpfile.js",
   "scripts": {
