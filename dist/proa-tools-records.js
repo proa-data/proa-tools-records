@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.9.0 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.9.1 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -401,7 +401,7 @@ function getPtItemManageDirectiveOptions( $compile ) {
 
 			function postLink( scope, element, attrs ) {
 				attrs.$set( this.name, null );
-				$compile( element )( scope );
+				element.replaceWith( $compile( $( '<div>' ).append( element.clone() ).html() )( scope ) );
 			}
 		}
 	};

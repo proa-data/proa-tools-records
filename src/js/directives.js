@@ -372,7 +372,7 @@ function getPtItemManageDirectiveOptions( $compile ) {
 
 			function postLink( scope, element, attrs ) {
 				attrs.$set( this.name, null );
-				$compile( element )( scope );
+				element.replaceWith( $compile( $( '<div>' ).append( element.clone() ).html() )( scope ) );
 			}
 		}
 	};

@@ -2,7 +2,6 @@ const pckg = require('./package.json'),
 	gulp = require('gulp'),
 	$ = require('gulp-load-plugins')(),
 	mainBowerFiles = require('main-bower-files'),
-	gulpSync = $.sync(gulp),
 	injStr = $.injectString,
 	browserSync = require('browser-sync').create();
 
@@ -21,28 +20,22 @@ const nl = '\n';
 gulp.task('del:dist', () => delFolder(paths.dist));
 gulp.task('styles:copy', () => processCss());
 gulp.task('styles:min', () => processCss((stream) => stream.pipe($.cssnano()).pipe(renameMin())));
-gulp.task('styles', ['styles:copy', 'styles:min']);
+gulp.task('styles', gulp.series('styles:copy', 'styles:min'));
 
 gulp.task('scripts:copy', () => processJs());
 gulp.task('scripts:min', () => processJs((stream) => stream.pipe($.ngAnnotate()).pipe($.uglify({output: {comments: '/^!/'}})).pipe(renameMin())));
-gulp.task('scripts', ['scripts:copy', 'scripts:min']);
+gulp.task('scripts', gulp.series('scripts:copy', 'scripts:min'));
 
-gulp.task('build', gulpSync.sync([
-	'del:dist',
-	['styles', 'scripts']
-]));
+gulp.task('build', gulp.series('del:dist', gulp.parallel('styles', 'scripts')));
 
 gulp.task('del:tmp', () => delFolder(paths.tmp));
-gulp.task('index', ['build'], () => gulp.src(paths.demo+'index.html').pipe($.wiredep({devDependencies: true})).pipe($.useref()).pipe(injStr.replace('{{PACKAGE_NAME}}', packageName)).pipe(gulp.dest(paths.tmp)));
+gulp.task('index', gulp.series('build', () => gulp.src(paths.demo+'index.html').pipe($.wiredep({devDependencies: true})).pipe($.useref()).pipe(injStr.replace('{{PACKAGE_NAME}}', packageName)).pipe(gulp.dest(paths.tmp))));
 gulp.task('styles:tmp', () => gulp.src(paths.src+'less/index.less').pipe(injStr.prepend('// bower:less'+nl+'// endbower'+nl)).pipe($.wiredep()).pipe($.less()).pipe($.rename({basename: baseName})).pipe(gulp.dest(paths.tmp+'styles/')));
 gulp.task('fonts', () => gulp.src(mainBowerFiles()).pipe($.filter('**/*.{eot,otf,svg,ttf,woff,woff2}')).pipe(gulp.dest(paths.tmp+'fonts/')));
 
-gulp.task('demo', gulpSync.sync([
-	'del:tmp',
-	['index', 'styles:tmp', 'fonts']
-]), () => browserSync.init({server: {baseDir: paths.tmp}}));
+gulp.task('demo', gulp.series('del:tmp', gulp.parallel('index', 'styles:tmp', 'fonts'), () => browserSync.init({server: {baseDir: paths.tmp}})));
 
-gulp.task('default', ['build']);
+gulp.task('default', gulp.task('build'));
 
 function delFolder(path) {
 	return gulp.src(path, {read: false})
