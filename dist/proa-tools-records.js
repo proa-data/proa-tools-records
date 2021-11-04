@@ -1,5 +1,5 @@
 /*!
- * Proa Tools Records v1.9.0 (https://github.com/proa-data/proa-tools-records)
+ * Proa Tools Records v1.9.3 (https://github.com/proa-data/proa-tools-records)
  */
 
 ( function() {
@@ -38,9 +38,6 @@ angular
 	.directive( 'paginationNext', paginationNext )
 	.directive( 'ptOrder', ptOrder )
 	.directive( 'ptItem', ptItem )
-	.factory( 'getPtItemManageDirectiveOptions', getPtItemManageDirectiveOptions )
-	.directive( 'ptItemManageInput', ptItemManageInput )
-	.directive( 'ptItemManageOutput', ptItemManageOutput )
 	.directive( 'tableSticky', tableSticky );
 
 var SN = { // Scope names
@@ -55,7 +52,8 @@ var SN = { // Scope names
 		ITEM_SN: '$$itemSn'
 	},
 	INDEX_ITEM = '$$index',
-	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records';
+	PT_PAGINATION_CLASS_NAME = 'pagination-pt-records',
+	IPN_IS_EDITING = '$$isEditing'; // Item property name
 
 function ptList( $filter, uibPaginationConfig ) {
 	var OSN = { // Own scope names
@@ -171,8 +169,11 @@ function ptList( $filter, uibPaginationConfig ) {
 				.attr( 'pt-list-values', '' )
 				.find( '[' + ATTR + ']' )
 					.each( function() {
-						var elem = $( this );
-						elem.attr( 'ng-repeat', getItemSn( elem.attr( ATTR ) ) + ' in ' + SN.LIST );
+						var elem = $( this ),
+							itemSn = getItemSn( elem.attr( ATTR ) );
+						elem
+							.attr( 'ng-repeat', itemSn + ' in ' + SN.LIST )
+							.attr( 'ng-class', '{\'pt-item-editing\': ' + itemSn + '.' + IPN_IS_EDITING + '}' );
 					} )
 				.end()
 			.end()
@@ -279,10 +280,7 @@ function ptOrder() {
 
 function ptItem( $window, PT_RECORDS_TEXTS ) {
 	var MANAGE_ATTR_NAME = 'ptItemManage',
-		IPN = { // Item property name
-			OLD: '$$old',
-			IS_EDITING: '$$isEditing'
-		},
+		IPN_OLD = '$$old',
 		OSN = {
 			START_EDITION: '$startEdition',
 			DELETE: '$delete',
@@ -331,8 +329,8 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 			scope[ SN.IS_EDITING ] = isEditing;
 
 			function startEdition( item ) {
-				item[ IPN.OLD ] = angular.copy( item );
-				item[ IPN.IS_EDITING ] = true;
+				item[ IPN_OLD ] = angular.copy( item );
+				item[ IPN_IS_EDITING ] = true;
 			}
 
 			function deleteItem( item ) {
@@ -343,7 +341,7 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 			}
 
 			function edit( item ) {
-				executeAfterPromise( itemManageOptions.edit( item, item[ IPN.OLD ] ), function() {
+				executeAfterPromise( itemManageOptions.edit( item, item[ IPN_OLD ] ), function() {
 					endEdition( item );
 				} );
 			}
@@ -352,11 +350,11 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 				angular.forEach( item, function( value, key ) {
 					switch ( key ) {
 					case INDEX_ITEM:
-					case IPN.OLD:
-					case IPN.IS_EDITING:
+					case IPN_OLD:
+					case IPN_IS_EDITING:
 						break;
 					default:
-						var oldValue = item[ IPN.OLD ][ key ];
+						var oldValue = item[ IPN_OLD ][ key ];
 						if ( oldValue === undefined )
 							delete item[ key ];
 						else
@@ -367,7 +365,7 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 			}
 
 			function isEditing( item ) {
-				return item[ IPN.IS_EDITING ];
+				return item[ IPN_IS_EDITING ];
 			}
 
 			function executeAfterPromise( promise, execute ) {
@@ -380,39 +378,11 @@ function ptItem( $window, PT_RECORDS_TEXTS ) {
 			}
 
 			function endEdition( item ) {
-				delete item[ IPN.OLD ];
-				delete item[ IPN.IS_EDITING ];
+				delete item[ IPN_OLD ];
+				delete item[ IPN_IS_EDITING ];
 			}
 		}
 	}
-}
-
-function getPtItemManageDirectiveOptions( $compile ) {
-	return function( isInput ) {
-		return {
-			restrict: 'A',
-			compile: compile
-		};
-
-		function compile( element, attrs ) {
-			attrs.$set( isInput ? 'ngShow' : 'ngHide', SN.IS_EDITING + '({{' + SN.ITEM_SN + '}})' );
-
-			return postLink;
-
-			function postLink( scope, element, attrs ) {
-				attrs.$set( this.name, null );
-				$compile( element )( scope );
-			}
-		}
-	};
-}
-
-function ptItemManageOutput( getPtItemManageDirectiveOptions ) {
-	return getPtItemManageDirectiveOptions();
-}
-
-function ptItemManageInput( getPtItemManageDirectiveOptions ) {
-	return getPtItemManageDirectiveOptions( true );
 }
 
 function tableSticky() {
